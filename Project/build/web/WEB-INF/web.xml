@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <servlet>
+        <servlet-name>Info</servlet-name>
+        <servlet-class>com.fb.api.Info</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Info</servlet-name>
+        <url-pattern>/Info</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>myServlet</servlet-name>
+        <servlet-class>com.fb.api.myServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>myServlet</servlet-name>
+        <url-pattern>/myServlet</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>index</servlet-name>
+        <servlet-class>com.fb.api.index</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>index</servlet-name>
+        <url-pattern>/index</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>index</welcome-file>
+    </welcome-file-list>
+    
+</web-app>
