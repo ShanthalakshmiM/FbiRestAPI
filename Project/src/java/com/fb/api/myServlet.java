@@ -39,7 +39,7 @@ public class myServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
-           
+
         }
     }
 
@@ -55,63 +55,76 @@ public class myServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-       // processRequest(request, response);
-       
-       //for webhook verification
-       String VERIFY_TOKEN = "Shantha";
-       
-       String stringToJsp = new String();
-       
+        // processRequest(request, response);
+
+        //for webhook verification
+        String VERIFY_TOKEN = "Shantha";
+
+        String stringToJsp = new String();
+
         Properties prop = new Properties();
         prop.load(getServletContext().getResourceAsStream("/WEB-INF/config.properties"));
         String token = prop.getProperty("access_token");
-       
-       
-       //button click for posting message
-       if(request.getParameter("btnPost")!=null){
-           String message = request.getParameter("StrPost");
-           //call function to post on faceboook
-         //  stringToJsp = Activities.makePost(message);
-          stringToJsp = Activities.postToPage(message);
-           if(stringToJsp != null){
-               //passing values to jsp page
-           request.getSession().setAttribute("result", stringToJsp);
-           
-           request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
-          }
-       }
-       // button click action for get messages
-       if(request.getParameter("btnGetMsg")!= null){
-           //function call
-           JSONArray messages = null;
-           try {
-               messages = Activities.getConversations();
-           } catch (JSONException ex) {
-               Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-           }
-            stringToJsp = messages.toString();
-           
-         if(stringToJsp != null){
-           // passing vlue to jsp
-           request.setAttribute("result", stringToJsp);
-           request.getRequestDispatcher("/RedirectJsp.jsp").forward(request, response);
-         }
-       }
 
-       //
-       if(request.getParameter("btnGetCmnt")!=null){
-           //function call
-           JSONArray cmnts = Activities.getAllPostComments();
-           stringToJsp = cmnts.toString();
-           if(stringToJsp != null){
-               //passing values to jsp
-           request.setAttribute("result",stringToJsp);
-           request.setAttribute("token", token);
-           request.getRequestDispatcher("/RedirectJsp.jsp").forward(request, response);
-           }
-           
-       }
-       if(request.getParameter("btnSendMsg")!=null){
+        //button click for posting message
+        if (request.getParameter("btnPost") != null) {
+            String message = request.getParameter("StrPost");
+            //call function to post on faceboook
+            //  stringToJsp = Activities.makePost(message);
+            stringToJsp = Activities.postToPage(message);
+            if (stringToJsp != null) {
+                //passing values to jsp page
+                request.getSession().setAttribute("result", stringToJsp);
+
+                request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
+            }
+        }
+        // button click action for get messages
+        if (request.getParameter("btnGetMsg") != null) {
+            //function call
+            JSONArray messages = null;
+            try {
+                messages = Activities.getConversations();
+            } catch (JSONException ex) {
+                Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            stringToJsp = messages.toString();
+
+            if (stringToJsp != null) {
+                // passing vlue to jsp
+                request.setAttribute("result", stringToJsp);
+                request.getRequestDispatcher("/RedirectJsp.jsp").forward(request, response);
+            }
+        }
+
+        //
+        if (request.getParameter("btnGetCmnt") != null) {
+            //try {
+                //function call
+            JSONArray posts= new JSONArray();
+            JSONArray cmnts = new JSONArray();
+            try {
+                posts = Activities.getAllPostComments();
+                cmnts = Activities.getComments();
+            } catch (JSONException ex) {
+                Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            stringToJsp = posts.toString();
+            String cmntsString = cmnts.toString();
+//if(stringToJsp != null){
+//passing values to jsp
+
+//stringToJsp = Activities.getAllPostComments();
+//            } catch (JSONException ex) {
+//                Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+            request.getSession().setAttribute("result", stringToJsp);
+            request.getSession().setAttribute("token", cmntsString);
+            request.getRequestDispatcher("/forCheck.jsp").forward(request, response);
+            // }
+
+        }
+        if (request.getParameter("btnSendMsg") != null) {
 //           for(int i=0; i<Activities.availCustomers.length();i++){
 //               String val = "name"+String.valueOf(i)+"";
 //               if(request.getParameter(val) != null){
@@ -122,23 +135,23 @@ public class myServlet extends HttpServlet {
 //                       Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
 //                   }
 //           }
-           String message = request.getParameter("StrMessage");
-           String recipient = request.getParameter("id");
-           String res = new String();
-           try {
-               res = Activities.sendMessage(recipient, message);
-           } catch (JSONException ex) {
-               Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-           }
-           if(res != null)
-               stringToJsp = "Message sent";
-           else
-               stringToJsp = "Error";
-           request.getSession().setAttribute("result", stringToJsp);
-           request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
-       }
-       
-       
+            String message = request.getParameter("StrMessage");
+            String recipient = request.getParameter("id");
+            String res = new String();
+            try {
+                res = Activities.sendMessage(recipient, message);
+            } catch (JSONException ex) {
+                Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (res != null) {
+                stringToJsp = "Message sent";
+            } else {
+                stringToJsp = "Error";
+            }
+            request.getSession().setAttribute("result", stringToJsp);
+            request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
+        }
+
     }
 
     /**

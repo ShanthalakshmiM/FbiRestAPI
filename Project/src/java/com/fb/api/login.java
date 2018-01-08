@@ -97,10 +97,10 @@ public class login extends HttpServlet {
                     throw new RuntimeException("Error: Code is null");
                 } else {
                     URL url;
-                    username = "inside else";
+             
                     //hit url to get access token
                     try {
-                        username = "inside try";
+                     
                         url = new URL("https://graph.facebook.com/oauth/access_token?client_id=" + Constants.APP_ID + "&redirect_uri=" + Constants.REDIRECT_URI + "&client_secret=" + Constants.APP_SECRET + "&code=" + code);
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -143,7 +143,10 @@ public class login extends HttpServlet {
                     prop.store(output, null);
                     
                     Constants.MY_ACCESS_TOKEN = accessToken;
+                    
+                    URL lngLivedURL = new URL("https://graph.facebook.com/oauth/access_token?client_id="+Constants.APP_ID+"&client_secret="+Constants.APP_SECRET+"&grant_type=fb_exchange_token&fb_exchange_token="+accessToken+"");
                 }
+                
             }
 
         } catch (Exception e) {

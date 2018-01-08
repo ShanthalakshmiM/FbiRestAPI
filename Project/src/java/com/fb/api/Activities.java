@@ -53,46 +53,113 @@ public class Activities {
         return postStatus;
     }
 
-    public static JSONArray getAllPostComments() {
+    public static JSONArray getAllPostComments() throws JSONException {
         //to hold the comments of all posts
-        JSONArray receivedCmnts = new JSONArray();
+        
+        JSONArray pagePosts = new JSONArray();
+        String cmntsString = new String();
         //fetch all the posts
         Connection<Post> pageFeed = fbPageClient.fetchConnection(Constants.PAGE_ID + "/feed", Post.class);
         for (List<Post> feed : pageFeed) {
-            for (Post post : feed) {
+
+            for (int i = 0; i < feed.size(); i++) {
                 //for ech post
-                JSONObject cmnts = new JSONObject();
-                //fetch comments of ech post
+                JSONObject posts = new JSONObject();
+                Post post = feed.get(i);
+                // posts += post.getMessage();
+                posts.put("postMessage", post.getMessage());
+                pagePosts.put(posts);
+                Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
+                //if(cmntDetails.getTotalCount()==0){
+                if (cmntDetails != null) {
+                   
+                    List<Comment> cmntList = cmntDetails.getData();
 
-                cmnts = getComments(post.getId(), post.getMessage());
+                    for (Comment comment : cmntList) {
+                        JSONArray receivedCmnts = new JSONArray();
+                        String id = comment.getId();
+                        String[] temp = id.split("_");
+                        String postID = temp[0];
+                        String id2 = post.getId();
+                        String[] temp2 = id2.split("_");
+                        String rID = temp2[1];
+                        if(postID.equals(rID)){
+                        JSONObject cmnts = new JSONObject();
+                        //fetch sender name and message
+                        try {
+                           // cmnts.put("postMessage", post.getMessage());
+                            cmnts.put("sender", comment.getFrom().getName());
+                            cmnts.put("comment", comment.getMessage());
 
-                receivedCmnts.put(cmnts);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        receivedCmnts.put(cmnts);
+                        pagePosts.put(receivedCmnts);
+
+                    }
+                    
+                }
+                }
+              //  }
+//                Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
+//
+//                if (cmntDetails != null) {
+//                    List<Comment> cmntList = cmntDetails.getData();
+//                    
+//                    for (Comment comment : cmntList) {
+//                        //fetch sender name and message
+//                        JSONObject cmnts = new JSONObject();
+//                        try {
+//                            cmnts.put("sender", comment.getFrom().getName());
+//                            cmnts.put("comment", comment.getMessage());
+//
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                       
+//                        receivedCmnts.put(cmnts);
+//                    }
+//                     
+//                    pagePosts.put(receivedCmnts);
+//                }
+//                else
+//                    pagePosts.put("nothing");
+
+                 
             }
         }
-        return receivedCmnts;
+        return pagePosts;
     }
 
-    public static JSONObject getComments(String postId, String postContent) {
-        JSONObject cmnts = new JSONObject();
-        Connection<Comment> cmntDetails = fbPageClient.fetchConnection(postId + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
+    public static JSONArray getComments() {
+        JSONArray fullCmnts = new JSONArray();
+        Connection<Post> pageFeed = fbPageClient.fetchConnection(Constants.PAGE_ID + "/feed", Post.class);
+        for (List<Post> feed : pageFeed) {
+            for (Post post : feed) {
+                Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
 
-        if (cmntDetails != null) {
-            List<Comment> cmntList = cmntDetails.getData();
+                if (cmntDetails != null) {
+                    List<Comment> cmntList = cmntDetails.getData();
 
-            for (Comment comment : cmntList) {
-                //fetch sender name and message
-                try {
-                    cmnts.put("postContent", postContent);
-                    cmnts.put("sender", comment.getFrom().getName());
-                    cmnts.put("content", comment.getMessage());
+                    for (Comment comment : cmntList) {
+                        JSONObject cmnts = new JSONObject();
+                        //fetch sender name and message
+                        try {
+                            cmnts.put("postMessage", post.getMessage());
+                            cmnts.put("sender", comment.getFrom().getName());
+                            cmnts.put("comment", comment.getMessage());
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        fullCmnts.put(cmnts);
+
+                    }
                 }
-
             }
         }
-        return cmnts;
+        return fullCmnts;
 
     }
     public static JSONArray availCustomers = new JSONArray();
@@ -100,13 +167,13 @@ public class Activities {
     public static JSONArray getConversations() throws JSONException {
         JSONArray customers = new JSONArray();
         String id = new String();
-        
+
         //fetch users sent message to your page
         Message m = null;
         Connection<Conversation> connection = fbPageClient.fetchConnection("me/conversations", Conversation.class);
-  // Connection<Conversation> connection = fbPageClient.fetchConnection("me/conversations", Conversation.class);
+        // Connection<Conversation> connection = fbPageClient.fetchConnection("me/conversations", Conversation.class);
         List<Conversation> conversationPageTemp = connection.getData();
-        
+
         for (int i = 0; i < conversationPageTemp.size(); i++) {
             Conversation temp = conversationPageTemp.get(i);
 
@@ -123,7 +190,7 @@ public class Activities {
                 id = convo.getId();
                 Connection<Message> messages = fbPageClient.fetchConnection(id + "/messages", Message.class, Parameter.with("fields", "message, created_time, from, id"));
                 try {
-                    
+
                     List<Message> data = messages.getData();
                     for (int i = 0; i < data.size(); i++) {
                         m = data.get(i);
@@ -134,18 +201,15 @@ public class Activities {
                         msg.put("content", m.getMessage());
                         receivedMsgs.put(msg);
                     }
-                   
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                  receivedConvos.put(receivedMsgs);
+                receivedConvos.put(receivedMsgs);
 
             }
-           
 
         }
-        
 
         return receivedConvos;
     }
@@ -178,10 +242,9 @@ public class Activities {
 
     public static String sendMessage(String id, String message) throws JSONException {
 
-       
         IdMessageRecipient recipient = new IdMessageRecipient(id);
 
-        SendResponse resp = fbPageClient.publish(id+ "/messages", SendResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", message));
+        SendResponse resp = fbPageClient.publish(id + "/messages", SendResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", message));
 
         return "success";
     }

@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="3">
         <file>
             <url>web/Activities.jsp</url>
             <bookmark id="2">
                 <name/>
                 <line>10</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>web/RedirectJsp.jsp</url>
+            <bookmark id="3">
+                <name/>
+                <line>57</line>
                 <key/>
             </bookmark>
         </file>
@@ -16,6 +24,8 @@
             <file>file:/C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/src/java/com/fb/api/Constants.java</file>
             <file>file:/C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/src/java/com/fb/api/Activities.java</file>
             <file>file:/C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/Activities.jsp</file>
+            <file>file:/C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/StringResponses.jsp</file>
+            <file>file:/C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/forCheck.jsp</file>
             <file>file:/C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/RedirectJsp.jsp</file>
         </group>
     </open-files>
