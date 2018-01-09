@@ -55,7 +55,7 @@ public class Activities {
 
     public static JSONArray getAllPostComments() throws JSONException {
         //to hold the comments of all posts
-        
+
         JSONArray pagePosts = new JSONArray();
         String cmntsString = new String();
         //fetch all the posts
@@ -72,22 +72,15 @@ public class Activities {
                 Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
                 //if(cmntDetails.getTotalCount()==0){
                 if (cmntDetails != null) {
-                   
+
                     List<Comment> cmntList = cmntDetails.getData();
 
                     for (Comment comment : cmntList) {
                         JSONArray receivedCmnts = new JSONArray();
-                        String id = comment.getId();
-                        String[] temp = id.split("_");
-                        String postID = temp[0];
-                        String id2 = post.getId();
-                        String[] temp2 = id2.split("_");
-                        String rID = temp2[1];
-                        if(postID.equals(rID)){
                         JSONObject cmnts = new JSONObject();
                         //fetch sender name and message
                         try {
-                           // cmnts.put("postMessage", post.getMessage());
+                            // cmnts.put("postMessage", post.getMessage());
                             cmnts.put("sender", comment.getFrom().getName());
                             cmnts.put("comment", comment.getMessage());
 
@@ -98,35 +91,8 @@ public class Activities {
                         pagePosts.put(receivedCmnts);
 
                     }
-                    
                 }
-                }
-              //  }
-//                Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
-//
-//                if (cmntDetails != null) {
-//                    List<Comment> cmntList = cmntDetails.getData();
-//                    
-//                    for (Comment comment : cmntList) {
-//                        //fetch sender name and message
-//                        JSONObject cmnts = new JSONObject();
-//                        try {
-//                            cmnts.put("sender", comment.getFrom().getName());
-//                            cmnts.put("comment", comment.getMessage());
-//
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                       
-//                        receivedCmnts.put(cmnts);
-//                    }
-//                     
-//                    pagePosts.put(receivedCmnts);
-//                }
-//                else
-//                    pagePosts.put("nothing");
 
-                 
             }
         }
         return pagePosts;
