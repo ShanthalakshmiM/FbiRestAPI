@@ -5,8 +5,11 @@
  */
 package com.fb.api;
 
+import com.restfb.DefaultFacebookClient;
 import com.restfb.DefaultJsonMapper;
+import com.restfb.FacebookClient;
 import com.restfb.Parameter;
+import com.restfb.Version;
 import com.restfb.types.GraphResponse;
 import com.restfb.types.send.IdMessageRecipient;
 import com.restfb.types.send.Message;
@@ -21,6 +24,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import static org.jboss.weld.logging.BeanLogger.LOG;
 
 /**
  *
@@ -41,8 +45,8 @@ public class index extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        String check = "before try";
-        try(PrintWriter out = response.getWriter()) {
+        
+      
             /* TODO output your page here. You may use following sample code. */
 //            String temp = "xxx";
 //            out.println(temp);
@@ -57,51 +61,9 @@ public class index extends HttpServlet {
 //            out.println(temp);
 //            out.println("</body>");
 //            out.println("</html>");
-                check = "before webhook";
-            if((request.getParameter("hub.verify_token").equals("Shantha")) && 
-                        (request.getParameter("hub.mode").equals("subscribe"))){
-                        out.write(request.getParameter("hub.challenge"));
-                    } else
-                out.println("WRONG TOKEN!");
-             //   request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
-             check = "after webhook";
-             
-             String result = new String();
-        String message = request.getParameter("StrMsg");
-        String body = request.getReader().lines().reduce("", (accumulator,actual) -> accumulator + actual);
-        DefaultJsonMapper mapper = new DefaultJsonMapper();
-        WebhookObject object = mapper.toJavaObject(body, WebhookObject.class);
-        
-        check = "before sending";
-        for(WebhookEntry entry : object.getEntryList()){
-            if(!entry.getMessaging().isEmpty()){
-                for(MessagingItem item : entry.getMessaging()){
-                    String senderId = item.getSender().getId();
-                    check = "inside sending";
-                    IdMessageRecipient recpient = new IdMessageRecipient((senderId));
-                    
-                    if(item.getMessage() != null){
-                        Message msg = new Message("Hello");
-                        
-                       GraphResponse resp= Activities.fbPageClient.publish("me/messages", GraphResponse.class , Parameter.with("recipient", recpient), Parameter.with("message", msg));
-                       
-                       if(resp.isSuccess()){
-                           out.println("Success "+resp.getId());
-                       }
-                       else
-                           out.println("Failure");
-                    }
-                }
-            }
-        }
-        check = "after sending";
-        out.println(check);
-        request.getRequestDispatcher("/RedirectJsp.jsp").forward(request, response);
-                }
-        catch(Exception e){
-            out.println(e.toString());
-        }
+         
     }
+
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -114,7 +76,7 @@ public class index extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+       // processRequest(request, response);
 //        String VERIFY_TOKEN = "Shantha";
 //        
 //        if(request.getParameter("hub.token").equals(VERIFY_TOKEN) && 
@@ -122,6 +84,54 @@ public class index extends HttpServlet {
 //            response.getWriter().write(request.getParameter("hub.challenge"));
 //        }
 //        request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
+  try (PrintWriter out = response.getWriter()) {
+String check = "before try";
+
+ check = "before webhook";
+            if ((request.getParameter("hub.verify_token").equals("Shantha"))
+                    && (request.getParameter("hub.mode").equals("subscribe"))) {
+                out.write(request.getParameter("hub.challenge"));
+            } else {
+                out.println("WRONG TOKEN!");
+            }
+            //   request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
+            check = "after webhook";
+
+            String result = new String();
+            String message = request.getParameter("StrMsg");
+            String body = request.getReader().lines().reduce("", (accumulator, actual) -> accumulator + actual);
+            DefaultJsonMapper mapper = new DefaultJsonMapper();
+            WebhookObject object = mapper.toJavaObject(body, WebhookObject.class);
+
+            check = "before sending";
+            for (WebhookEntry entry : object.getEntryList()) {
+                if (!entry.getMessaging().isEmpty()) {
+                    for (MessagingItem item : entry.getMessaging()) {
+                        String senderId = item.getSender().getId();
+                        check = "inside sending";
+                        IdMessageRecipient recpient = new IdMessageRecipient((senderId));
+
+                        if (item.getMessage() != null) {
+                            Message msg = new Message("Hello");
+
+                            GraphResponse resp = Activities.fbPageClient.publish("me/messages", GraphResponse.class, Parameter.with("recipient", recpient), Parameter.with("message", msg));
+
+                            if (resp.isSuccess()) {
+                                out.println("Success " + resp.getId());
+                            } else {
+                                out.println("Failure");
+                            }
+                        }
+                    }
+                }
+            }
+            check = "after sending";
+            out.println(check);
+            request.getRequestDispatcher("/RedirectJsp.jsp").forward(request, response);
+             } catch (Exception e) {
+            out.println(e.toString());
+        } 
+        
     }
 
     /**
@@ -135,8 +145,40 @@ public class index extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        //processRequest(request, response);
+        String body = request.getReader().lines().reduce("", (accumulator, actual) -> accumulator + actual);
+        DefaultJsonMapper mapper = new DefaultJsonMapper();
+        WebhookObject webhookObject = mapper.toJavaObject(body, WebhookObject.class);
         
+        for (WebhookEntry entry : webhookObject.getEntryList()) {
+            if (!entry.getMessaging().isEmpty()) {
+                for (MessagingItem item : entry.getMessaging()) {
+                   
+                    String senderId = item.getSender().getId();
+
+          // create recipient
+          IdMessageRecipient recipient = new IdMessageRecipient(senderId);
+
+          // check message
+          if (item.getMessage() != null && item.getMessage().getText() != null) {
+            // create simple text message
+            Message simpleTextMessage = new Message("Echo: " + item.getMessage().getText());
+
+            // build send client and send message
+            FacebookClient sendClient = new DefaultFacebookClient(Constants.PAGE_ACCESS_TOKEN, Version.VERSION_2_6);
+            sendClient.publish("me/messages", GraphResponse.class, Parameter.with("recipient", recipient),
+              Parameter.with("message", simpleTextMessage));
+          }
+
+          if (item.getPostback() != null) {
+            LOG.debug("run postback");
+          }
+                }
+
+            }
+        }
+        request.getSession().setAttribute("result", body);
+        request.getRequestDispatcher("/forCheck.jsp").forward(request, response);
     }
 
     /**
