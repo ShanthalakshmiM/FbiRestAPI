@@ -85,9 +85,9 @@ public class index extends HttpServlet {
 //        }
 //        request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
   try (PrintWriter out = response.getWriter()) {
-String check = "before try";
 
- check = "before webhook";
+
+
             if ((request.getParameter("hub.verify_token").equals("Shantha"))
                     && (request.getParameter("hub.mode").equals("subscribe"))) {
                 out.write(request.getParameter("hub.challenge"));
@@ -95,42 +95,8 @@ String check = "before try";
                 out.println("WRONG TOKEN!");
             }
             //   request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
-            check = "after webhook";
+           
 
-            String result = new String();
-            String message = request.getParameter("StrMsg");
-            String body = request.getReader().lines().reduce("", (accumulator, actual) -> accumulator + actual);
-            DefaultJsonMapper mapper = new DefaultJsonMapper();
-            WebhookObject object = mapper.toJavaObject(body, WebhookObject.class);
-
-            check = "before sending";
-            for (WebhookEntry entry : object.getEntryList()) {
-                if (!entry.getMessaging().isEmpty()) {
-                    for (MessagingItem item : entry.getMessaging()) {
-                        String senderId = item.getSender().getId();
-                        check = "inside sending";
-                        IdMessageRecipient recpient = new IdMessageRecipient((senderId));
-
-                        if (item.getMessage() != null) {
-                            Message msg = new Message("Hello");
-
-                            GraphResponse resp = Activities.fbPageClient.publish("me/messages", GraphResponse.class, Parameter.with("recipient", recpient), Parameter.with("message", msg));
-
-                            if (resp.isSuccess()) {
-                                out.println("Success " + resp.getId());
-                            } else {
-                                out.println("Failure");
-                            }
-                        }
-                    }
-                }
-            }
-            check = "after sending";
-            out.println(check);
-            request.getRequestDispatcher("/RedirectJsp.jsp").forward(request, response);
-             } catch (Exception e) {
-            out.println(e.toString());
-        } 
         
     }
 
