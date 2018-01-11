@@ -65,6 +65,9 @@
                         
                         <span id="myspan" style="width: 250px; margin-left: 20px; font-weight: bold; float: none;"></span><br/>
 
+                         Enter the recipient id: <input type="text" name="recipientId"/><br/>
+                    Enter the message: <input type="text" name="strMsg" /> <br/>
+                    <input type="submit" name ="btnSndMsg" value="Send Message"/>
 
                     </div>
                 </form>
@@ -139,11 +142,11 @@
 
             </div>
 
-            <!--            <div>
+                        <div>
                             <p>
-                                
+                                <%= session.getAttribute("username") %>
                             </p>
-                        </div>     -->
+                        </div>     
         </div>
 
     </center>

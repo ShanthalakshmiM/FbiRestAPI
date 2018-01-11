@@ -12,13 +12,25 @@
         <title>JSP Page</title>
     </head>
     <body>
+        <p>
+            <%= session.getAttribute("result") %>
+        </p>
         <script>
             var posts = ${result};
-            document.write("<textarea>");
-            for(var i =0; i<posts.length;i++){
-                document.write(posts[i]['postMessage']);
-               
+           
+            for(var i=0; i<posts.length; i++ ){
+                 document.write("<textarea>");
+                 
+                if(Array.isArray(posts[i])){
+                    for(j=0;j<posts[i].length;j++)
+                        document.writeln(posts[i][j]['sender']+" : "+posts[i][j]['comment']);
+                }
+                else{
+                    document.write(posts[i]['postMessage']);
+                }
+               document.write("</textarea>");
             }
+            
         </script>
     </body>
 </html>

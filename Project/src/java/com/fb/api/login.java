@@ -107,7 +107,7 @@ public class login extends HttpServlet {
                         throw new RuntimeException("Invlaid code");
                     }
                     URLConnection fbConnection;
-                    StringBuffer b = null;
+                    
                     //read the response
                     try {
                         fbConnection = url.openConnection();
@@ -144,7 +144,19 @@ public class login extends HttpServlet {
                     
                     Constants.MY_ACCESS_TOKEN = accessToken;
                     
-                    URL lngLivedURL = new URL("https://graph.facebook.com/oauth/access_token?client_id="+Constants.APP_ID+"&client_secret="+Constants.APP_SECRET+"&grant_type=fb_exchange_token&fb_exchange_token="+accessToken+"");
+                    URL lngLivedURL = new URL("https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id="+Constants.APP_ID+"&client_secret="+Constants.APP_SECRET+"&fb_exchange_token="+accessToken+"");
+                    
+                    URLConnection ATConnection = lngLivedURL.openConnection();
+                    
+                    BufferedReader br = new BufferedReader(new InputStreamReader(ATConnection.getInputStream()));
+                    
+                    String input;
+                    String finalval = new String();
+                    while((input = br.readLine()) != null){
+                        finalval += input;
+                    }
+                    br.close();
+                    username = finalval;
                 }
                 
             }

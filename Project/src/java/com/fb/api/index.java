@@ -44,24 +44,20 @@ public class index extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         response.setContentType("text/html;charset=UTF-8");
-        
-      
-            /* TODO output your page here. You may use following sample code. */
-//            String temp = "xxx";
-//            out.println(temp);
-//            temp = request.getParameter("hub.token");
-//            out.println("<!DOCTYPE html>");
-//            out.println("<html>");
-//            out.println("<head>");
-//            out.println("<title>Servlet index</title>");            
-//            out.println("</head>");
-//            out.println("<body>");
-//            out.println("<h1>Servlet index at " + request.getContextPath() + "</h1>");
-//            out.println(temp);
-//            out.println("</body>");
-//            out.println("</html>");
-         
+        PrintWriter out = response.getWriter();
+        if ((request.getParameter("hub.verify_token")) != null) {
+            if ((request.getParameter("hub.verify_token").equals("Shantha"))
+                    && (request.getParameter("hub.mode").equals("subscribe"))) {
+                out.write(request.getParameter("hub.challenge"));
+            } else {
+                out.println("WRONG TOKEN!");
+            }
+        } else {
+            // throw new RuntimeException("Error");
+        }
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -76,28 +72,20 @@ public class index extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-       // processRequest(request, response);
-//        String VERIFY_TOKEN = "Shantha";
-//        
-//        if(request.getParameter("hub.token").equals(VERIFY_TOKEN) && 
-//            request.getParameter("hub.mode").equals("subscribe")){
-//            response.getWriter().write(request.getParameter("hub.challenge"));
-//        }
-//        request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
-  try (PrintWriter out = response.getWriter()) {
+        //processRequest(request, response);
 
-
-
+        PrintWriter out = response.getWriter();
+        if ((request.getParameter("hub.verify_token")) != null) {
             if ((request.getParameter("hub.verify_token").equals("Shantha"))
                     && (request.getParameter("hub.mode").equals("subscribe"))) {
                 out.write(request.getParameter("hub.challenge"));
             } else {
                 out.println("WRONG TOKEN!");
             }
-            //   request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
-           
+        } else {
+            throw new RuntimeException("Error");
+        }
 
-        
     }
 
     /**
@@ -115,30 +103,30 @@ public class index extends HttpServlet {
         String body = request.getReader().lines().reduce("", (accumulator, actual) -> accumulator + actual);
         DefaultJsonMapper mapper = new DefaultJsonMapper();
         WebhookObject webhookObject = mapper.toJavaObject(body, WebhookObject.class);
-        
+
         for (WebhookEntry entry : webhookObject.getEntryList()) {
             if (!entry.getMessaging().isEmpty()) {
                 for (MessagingItem item : entry.getMessaging()) {
-                   
+
                     String senderId = item.getSender().getId();
 
-          // create recipient
-          IdMessageRecipient recipient = new IdMessageRecipient(senderId);
+                    // create recipient
+                    IdMessageRecipient recipient = new IdMessageRecipient(senderId);
 
-          // check message
-          if (item.getMessage() != null && item.getMessage().getText() != null) {
-            // create simple text message
-            Message simpleTextMessage = new Message("Echo: " + item.getMessage().getText());
+                    // check message
+                    if (item.getMessage() != null && item.getMessage().getText() != null) {
+                        // create simple text message
+                        Message simpleTextMessage = new Message("Echo: " + item.getMessage().getText());
 
-            // build send client and send message
-            FacebookClient sendClient = new DefaultFacebookClient(Constants.PAGE_ACCESS_TOKEN, Version.VERSION_2_6);
-            sendClient.publish("me/messages", GraphResponse.class, Parameter.with("recipient", recipient),
-              Parameter.with("message", simpleTextMessage));
-          }
+                        // build send client and send message
+                        FacebookClient sendClient = new DefaultFacebookClient(Constants.PAGE_ACCESS_TOKEN, Version.VERSION_2_6);
+                        sendClient.publish("me/messages", GraphResponse.class, Parameter.with("recipient", recipient),
+                                Parameter.with("message", simpleTextMessage));
+                    }
 
-          if (item.getPostback() != null) {
-            LOG.debug("run postback");
-          }
+                    if (item.getPostback() != null) {
+                        LOG.debug("run postback");
+                    }
                 }
 
             }
