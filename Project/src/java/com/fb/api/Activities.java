@@ -34,7 +34,7 @@ import org.json.JSONObject;
  * @author HP
  */
 public class Activities {
-
+    static JSONObject customerDetails = new JSONObject();
     static FacebookClient fbclient = new DefaultFacebookClient(Constants.MY_ACCESS_TOKEN);
 
     //client with page access token 
@@ -68,7 +68,7 @@ public class Activities {
                 Post post = feed.get(i);
                 // posts += post.getMessage();
                 posts.put("postMessage", post.getMessage());
-                pagePosts.put(posts);
+                //pagePosts.put(posts);
                 Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
                 //if(cmntDetails.getTotalCount()==0){
                 if (cmntDetails != null) {
@@ -88,12 +88,13 @@ public class Activities {
                             e.printStackTrace();
                         }
                         receivedCmnts.put(cmnts);
-                        pagePosts.put(receivedCmnts);
+                        posts.put("comments",receivedCmnts);
 
                     }
                 }
-
+                pagePosts.put(posts);
             }
+            
         }
         return pagePosts;
     }
@@ -212,6 +213,13 @@ public class Activities {
 
         SendResponse resp = fbPageClient.publish(id + "/messages", SendResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", message));
 
+        return "success";
+    }
+    public static String test(String recipientId, String message){
+        IdMessageRecipient recipient = new IdMessageRecipient(recipientId);
+
+        SendResponse resp = fbPageClient.publish(recipientId + "/messages", SendResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", message));
+        
         return "success";
     }
 

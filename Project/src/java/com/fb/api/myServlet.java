@@ -151,6 +151,13 @@ public class myServlet extends HttpServlet {
             request.getSession().setAttribute("result", stringToJsp);
             request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
         }
+        if(request.getParameter("btnSndMsg")!= null){
+            String message = request.getParameter("strMsg");
+            String recipientId = request.getParameter("recipientId");
+           stringToJsp = Activities.test(recipientId, message);
+            request.getSession().setAttribute("result", stringToJsp);
+            request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
+        }
 
     }
 
