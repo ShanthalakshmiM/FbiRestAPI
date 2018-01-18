@@ -134,7 +134,7 @@ public class Activities {
     public static JSONArray getConversations() throws JSONException {
         JSONArray customers = new JSONArray();
         String id = new String();
-
+        
         //fetch users sent message to your page
         Message m = null;
         Connection<Conversation> connection = fbPageClient.fetchConnection("me/conversations", Conversation.class);
@@ -156,6 +156,7 @@ public class Activities {
                 JSONArray receivedMsgs = new JSONArray();
                 id = convo.getId();
                 Connection<Message> messages = fbPageClient.fetchConnection(id + "/messages", Message.class, Parameter.with("fields", "message, created_time, from, id"));
+                System.out.println("Activities.java : Messages : "+messages.toString());
                 try {
 
                     List<Message> data = messages.getData();
