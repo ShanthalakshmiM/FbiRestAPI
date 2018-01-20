@@ -78,34 +78,31 @@ public class index extends HttpServlet {
         System.out.println("webhookObject : " + webhookObject.toString());
         for (WebhookEntry entry : webhookObject.getEntryList()) {
             //System.out.println("check1");
-            for(Change change : entry.getChanges()){
-                if(change.getField().equals("feed")){
+            for (Change change : entry.getChanges()) {
+                if (change.getField().equals("feed")) {
                     JSONObject webhookResponse = new JSONObject(sb.toString());
-        JSONArray entryJson = webhookResponse.getJSONArray("entry");
-        JSONArray changes = entryJson.getJSONObject(0).getJSONArray("changes");
-        JSONObject value = changes.getJSONObject(0).getJSONObject("value");
-        System.out.println("Values : "+value);
-       JSONObject from = value.getJSONObject("from");
-        String postContent = value.getString("message");
-        String sender = from.getString("name");
-        System.out.println(sender +" : "+postContent);
-                }
-                else{
+                    JSONArray entryJson = webhookResponse.getJSONArray("entry");
+                    JSONArray changes = entryJson.getJSONObject(0).getJSONArray("changes");
+                    JSONObject value = changes.getJSONObject(0).getJSONObject("value");
+                    System.out.println("Values : " + value);
+                    JSONObject from = value.getJSONObject("from");
+                    String postContent = value.getString("message");
+                    String sender = from.getString("name");
+                    System.out.println(sender + " : " + postContent);
+                } else {
                     if (!entry.getMessaging().isEmpty()) {
-                for (MessagingItem item : entry.getMessaging()) {
-                    String senderId = item.getSender().getId();
-                    String message = item.getMessage().getText().toString();
-                    System.out.println(senderId + " : " + message);
-                }
+                        for (MessagingItem item : entry.getMessaging()) {
+                            String senderId = item.getSender().getId();
+                            String message = item.getMessage().getText().toString();
+                            System.out.println(senderId + " : " + message);
+                        }
 
-            }
+                    }
                 }
             }
-            
-           
+
         }
-          
-      
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

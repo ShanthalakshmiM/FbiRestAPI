@@ -57,7 +57,8 @@ public class Activities {
         //to hold the comments of all posts
 
         JSONArray pagePosts = new JSONArray();
-        String cmntsString = new String();
+        String postId = new String();
+        String postMsg = new String();
         //fetch all the posts
         Connection<Post> pageFeed = fbPageClient.fetchConnection(Constants.PAGE_ID + "/feed", Post.class);
         for (List<Post> feed : pageFeed) {
@@ -68,6 +69,8 @@ public class Activities {
                 Post post = feed.get(i);
                 // posts += post.getMessage();
                 posts.put("postMessage", post.getMessage());
+                postMsg = post.getMessage();
+                postId = post.getId();
                 //pagePosts.put(posts);
                 Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
                 //if(cmntDetails.getTotalCount()==0){
@@ -96,6 +99,9 @@ public class Activities {
             }
             
         }
+//        System.out.println(postId + postMsg);
+//        fbPageClient.publish(postId+"/comments", String.class, Parameter.with("message", "comment through api"));
+
         return pagePosts;
     }
 
@@ -146,7 +152,7 @@ public class Activities {
 
             JSONObject customerDetails = new JSONObject();
             customerDetails.put("convId", temp.getId());
-            customerDetails.put("senderName", temp.getParticipants().get(0).getName());
+           // customerDetails.put("senderName", temp.getParticipants().get(0).getName());
             customers.put(customerDetails);
         }
         availCustomers = customers;
@@ -185,7 +191,7 @@ public class Activities {
     public static String postToPage(String message) {
         String status = new String();
 
-        FacebookType response = fbclient.publish(Constants.PAGE_ID + "/feed", FacebookType.class, Parameter.with("message", message));
+        FacebookType response = fbPageClient.publish(Constants.PAGE_ID + "/feed", FacebookType.class, Parameter.with("message", message));
         if (response.getId() != null) {
             status = "Successfully posted";
         }
