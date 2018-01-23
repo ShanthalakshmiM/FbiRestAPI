@@ -11,9 +11,9 @@ package com.fb.api;
  */
 public class Constants {
     public static String MY_ACCESS_TOKEN = "";
-    public static final String APP_ID = "XXXX";
+    public static final String APP_ID = "XXXXX";
     public static final String APP_SECRET = "XXXX";
-    public static String PAGE_ACCESS_TOKEN = "XXXX";
+    public static String PAGE_ACCESS_TOKEN = "";
     public static final String REDIRECT_URI = "http://localhost:8080/Project/login";
     public static String PAGE_ID = "XXXX";
     public static String recipient_id = null;

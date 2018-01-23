@@ -99,42 +99,24 @@ public class myServlet extends HttpServlet {
 
         //
         if (request.getParameter("btnGetCmnt") != null) {
-            //try {
-                //function call
+            
             JSONArray posts= new JSONArray();
-            JSONArray cmnts = new JSONArray();
+          
             try {
                 posts = Activities.getAllPostComments();
-                cmnts = Activities.getComments();
+               
             } catch (JSONException ex) {
                 Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
             stringToJsp = posts.toString();
-            String cmntsString = cmnts.toString();
-//if(stringToJsp != null){
-//passing values to jsp
-
-//stringToJsp = Activities.getAllPostComments();
-//            } catch (JSONException ex) {
-//                Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+          
             request.getSession().setAttribute("result", stringToJsp);
-            request.getSession().setAttribute("token", cmntsString);
+         
             request.getRequestDispatcher("/forCheck.jsp").forward(request, response);
-            // }
-
+     
         }
         if (request.getParameter("btnSendMsg") != null) {
-//           for(int i=0; i<Activities.availCustomers.length();i++){
-//               String val = "name"+String.valueOf(i)+"";
-//               if(request.getParameter(val) != null){
-//                   try {
-//                       JSONObject obj = Activities.availCustomers.getJSONObject(i);
-//                       Constants.recipient_id = obj.getString("convId");
-//                   } catch (JSONException ex) {
-//                       Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-//                   }
-//           }
+
             String message = request.getParameter("StrMessage");
             String recipient = request.getParameter("id");
             String res = new String();
@@ -154,7 +136,16 @@ public class myServlet extends HttpServlet {
         if(request.getParameter("btnSndMsg")!= null){
             String message = request.getParameter("strMsg");
             String recipientId = request.getParameter("recipientId");
-           stringToJsp = Activities.test(recipientId, message);
+            try {
+                stringToJsp = Activities.sendMessage(recipientId, message);
+            } catch (JSONException ex) {
+                Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            request.getSession().setAttribute("result", stringToJsp);
+            request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
+        }
+        if(request.getParameter("btReply")!= null){
+            stringToJsp = Activities.replyToComment("201841883710088_202497246977885");
             request.getSession().setAttribute("result", stringToJsp);
             request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
         }

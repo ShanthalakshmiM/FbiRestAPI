@@ -31,6 +31,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
@@ -79,16 +82,12 @@ public class login extends HttpServlet {
             throws ServletException, IOException {
 
         String accessToken = new String();
-        String username = "initialized";
-        
-        Properties prop = new Properties();
-        OutputStream output = new FileOutputStream("config.properties");
-
-        String outputString = new String();
+        String longLiveAT = new String();
+        String userId = new String();
         try {
             String rid = request.getParameter("request_ids");
             if (rid != null) {
-                response.sendRedirect("https://www.facebook.com/dialog/oauth?client_id=" + Constants.APP_ID + "&redirect_uri=" + Constants.REDIRECT_URI + "");
+                response.sendRedirect("https://www.facebook.com/dialog/oauth?client_id=" + Constants.APP_ID + "&redirect_uri=" + Constants.REDIRECT_URI + "&scope=email,user_friends,manage_pages,read_page_mailboxes,publish_actions,publish_pages,user_about_me,email,user_posts");
             } else {
                 String code = request.getParameter("code");
 
@@ -97,76 +96,100 @@ public class login extends HttpServlet {
                     throw new RuntimeException("Error: Code is null");
                 } else {
                     URL url;
-             
+
                     //hit url to get access token
                     try {
-                     
+
                         url = new URL("https://graph.facebook.com/oauth/access_token?client_id=" + Constants.APP_ID + "&redirect_uri=" + Constants.REDIRECT_URI + "&client_secret=" + Constants.APP_SECRET + "&code=" + code);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         throw new RuntimeException("Invlaid code");
                     }
-                    URLConnection fbConnection;
-                    
-                    //read the response
-                    try {
-                        fbConnection = url.openConnection();
-                        BufferedReader in;
-                        in = new BufferedReader(new InputStreamReader(
-                                fbConnection.getInputStream()));
-                        String inputLine;
+                    String urlResponse = getResponse(url);
+                    accessToken = getAccessToken(urlResponse,"access_token");
 
-                        while ((inputLine = in.readLine()) != null) {
-                            outputString = outputString + inputLine;
-                        }
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("Unable to connect with Facebook "
-                                + e);
-                    }
-                    //extract access token alone from response
-                    if (outputString.indexOf("access_token") != -1) {
-                        username = "getting access token";
-                        accessToken = outputString.substring(outputString.indexOf(":") + 1, outputString.indexOf(","));
-                    }
-
-                    if (accessToken.startsWith("{")) {
-                        username = "error";
-                        throw new RuntimeException("ERROR: Access Token Invalid: "
-                                + accessToken);
-                    }
-                   
-
-                    //save access token for further use
-                    prop.setProperty("access_token", accessToken);
-                    prop.store(output, null);
-                    
+                    //save accress token for further use
+                    System.out.println("Access Token :" + accessToken);
                     Constants.MY_ACCESS_TOKEN = accessToken;
+
+                    URL lngLivedURL = new URL("https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=" + Constants.APP_ID + "&client_secret=" + Constants.APP_SECRET + "&fb_exchange_token=" + accessToken);
+
+                    urlResponse = getResponse(lngLivedURL);
+                    longLiveAT = getAccessToken(urlResponse,"access_token");
+                    System.out.println("Long lived URL response: " + longLiveAT);
                     
-                    URL lngLivedURL = new URL("https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id="+Constants.APP_ID+"&client_secret="+Constants.APP_SECRET+"&fb_exchange_token="+accessToken+"");
                     
-                    URLConnection ATConnection = lngLivedURL.openConnection();
+                    String outputString = new String();
+                    URL forID = new URL("https://graph.facebook.com/v2.2/me?access_token="+longLiveAT);
+                    urlResponse = getResponse(forID);
+                    userId = getAccessToken(urlResponse,"id");
+                    System.out.println("Account Id : "+userId);
                     
-                    BufferedReader br = new BufferedReader(new InputStreamReader(ATConnection.getInputStream()));
+                    URL forPageToken = new URL("https://graph.facebook.com/v2.2/"+userId+"/accounts?access_token="+longLiveAT);
+                    outputString = getResponse(forPageToken);
                     
-                    String input;
-                    String finalval = new String();
-                    while((input = br.readLine()) != null){
-                        finalval += input;
-                    }
-                    br.close();
-                    username = finalval;
+                    System.out.println("Final response : "+getPageATs(outputString).toString());
                 }
-                
+
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         request.getSession().setAttribute("accessToken", accessToken);
-        request.getSession().setAttribute("user", username);
+        request.getSession().setAttribute("user", longLiveAT);
         request.getRequestDispatcher("Activities.jsp").forward(request, response);
+    }
+
+    public String getResponse(URL url) {
+        String response = new String();
+        
+        URLConnection fbConnection;
+
+        //read the response
+        try {
+            fbConnection = url.openConnection();
+            BufferedReader in;
+            in = new BufferedReader(new InputStreamReader(
+                    fbConnection.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response = response + inputLine;
+            }
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Unable to connect with Facebook "
+                    + e);
+        }
+        //extract access token alone from response
+        
+        return response;
+    }
+
+    public String getAccessToken(String response, String key) throws JSONException {    
+            JSONObject responseJson = new JSONObject(response);
+            String accessToken = responseJson.getString(key);
+        return accessToken;
+    }
+    
+    public JSONArray getPageATs(String response) throws JSONException{
+        JSONObject responseJson = new JSONObject(response);
+        JSONArray pages = new JSONArray();
+        JSONArray data = responseJson.getJSONArray("data");
+        
+       Constants.PAGE_ACCESS_TOKEN = data.getJSONObject(1).get("access_token").toString();
+        
+        
+        for(int i=0;i<data.length();i++){
+            JSONObject pageDetails = new JSONObject();
+            pageDetails.put("Token", data.getJSONObject(i).get("access_token"));
+            pageDetails.put("Name", data.getJSONObject(i).get("name"));
+            pageDetails.put("ID",data.getJSONObject(i).get("id"));
+            pages.put(pageDetails);
+        }
+        return pages;
     }
 
     /**

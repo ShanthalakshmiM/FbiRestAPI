@@ -62,7 +62,7 @@
                         <input type="button" class="btn btn-default" onclick="getCustomerDetails();" value="Get customer details"/><br/>
                         <input type="button" class="btn btn-default" onclick="addForMessage();" value="Send Message"/><br/>
                         <input type="button" class="btn btn-default"  onclick="add();" value="Post to your page"/> <br/>
-                        
+                        <input type="submit" class="btn btn-default" name="btReply" value="Post a reply"/>
                         <span id="myspan" style="width: 250px; margin-left: 20px; font-weight: bold; float: none;"></span><br/>
 
                          Enter the recipient id: <input type="text" name="recipientId"/><br/>

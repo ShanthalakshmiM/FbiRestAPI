@@ -31,7 +31,7 @@
         <div id="parent">
             <center>
         <form action="<%= request.getContextPath()%>/login" method="get" id="form">
-            <a href="https://www.facebook.com/dialog/oauth?client_id=<%= Constants.APP_ID%>&redirect_uri=<%= Constants.REDIRECT_URI%>&scope=email,user_friends,manage_pages,read_page_mailboxes,publish_actions,user_about_me,email,user_posts" > <img src="./images/facebookLoginButton.jpg"/> </a>
+            <a href="https://www.facebook.com/dialog/oauth?client_id=<%= Constants.APP_ID%>&redirect_uri=<%= Constants.REDIRECT_URI%>&scope=email,user_friends,manage_pages,read_page_mailboxes,publish_actions,publish_pages,user_about_me,email,user_posts" > <img src="./images/facebookLoginButton.jpg"/> </a>
             
         </form>
             </center>   
