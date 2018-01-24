@@ -5,8 +5,12 @@
  */
 package com.fb.api;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -163,7 +167,44 @@ public class myServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        //processRequest(request, response);
+        JSONObject data = new JSONObject();
+        JSONArray message = new JSONArray();
+        JSONObject dynamicMsg = new JSONObject();
+        JSONObject temp = new JSONObject();
+        try {
+            temp.put("text", "Broadcast test");
+            temp.put("fallbck_test","Hello friends");
+            dynamicMsg.put("dynamic_text", temp);
+        } catch (JSONException ex) {
+            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        message.put(dynamicMsg);
+        try {
+            data.put("messages", message);
+        } catch (JSONException ex) {
+            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        String urlResponse = new String();
+        
+        if(request.getParameter("broadcast")!= null){
+            try{
+            URL url = new URL("https://graph.facebook.com/v2.11/me/message_creatives?access_token="+Constants.PAGE_ACCESS_TOKEN+"&messages="+data);
+            
+            URLConnection urlConn = url.openConnection();
+            BufferedReader in;
+            in = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                urlResponse = urlResponse + inputLine;
+            }
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Message Creatives : "+urlResponse);
     }
 
     /**

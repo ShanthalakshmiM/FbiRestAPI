@@ -20,8 +20,14 @@ import com.restfb.types.Message;
 import com.restfb.types.Page;
 import com.restfb.types.Post;
 import com.restfb.types.User;
+import com.restfb.types.send.ButtonTemplatePayload;
 import com.restfb.types.send.IdMessageRecipient;
+import com.restfb.types.send.MediaAttachment;
+import com.restfb.types.send.PostbackButton;
 import com.restfb.types.send.SendResponse;
+import com.restfb.types.send.TemplateAttachment;
+import com.restfb.types.send.WebButton;
+//import com.restfb.types.send.Message;
 import com.sun.corba.se.spi.presentation.rmi.StubAdapter;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +78,7 @@ public class Activities {
 //                postId = post.getId();
                 //pagePosts.put(posts);
                 Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
-                System.out.println("Comment Details : "+cmntDetails);
+                System.out.println("Comment Details : " + cmntDetails);
                 //if(cmntDetails.getTotalCount()==0){
                 if (cmntDetails != null) {
 
@@ -104,14 +110,15 @@ public class Activities {
 
         return pagePosts;
     }
-    public static String replyToComment(String commentId){
-        fbPageClient.publish(commentId+"/comments", String.class , Parameter.with("message", "reply through api"));
+
+    public static String replyToComment(String commentId) {
+        fbPageClient.publish(commentId + "/comments", String.class, Parameter.with("message", "reply through api"));
         return "success";
     }
     public static JSONArray availCustomers = new JSONArray();
 
     public static JSONArray getConversations() throws JSONException {
-        System.out.println("PAT : "+Constants.PAGE_ACCESS_TOKEN);
+        System.out.println("PAT : " + Constants.PAGE_ACCESS_TOKEN);
         JSONArray customers = new JSONArray();
         String id = new String();
 
@@ -155,7 +162,7 @@ public class Activities {
 
     public static String postToPage(String message) {
         String status = new String();
-        System.out.println("PAT : "+Constants.PAGE_ACCESS_TOKEN);
+        System.out.println("PAT : " + Constants.PAGE_ACCESS_TOKEN);
         FacebookType response = fbPageClient.publish(Constants.PAGE_ID + "/feed", FacebookType.class, Parameter.with("message", message));
         if (response.getId() != null) {
             status = "Successfully posted";
@@ -165,7 +172,9 @@ public class Activities {
     }
 
     public static String sendMessage(String id, String message) throws JSONException {
-
+        // com.restfb.types.send.Message msg = new com.restfb.types.send.Message(message);
+//        MediaAttachment image = new MediaAttachment(MediaAttachment.Type.IMAGE, "http://restfb.com/documentation/");
+//        com.restfb.types.send.Message msg = new com.restfb.types.send.Message(image);
         IdMessageRecipient recipient = new IdMessageRecipient(id);
 
         SendResponse resp = fbPageClient.publish(id + "/messages", SendResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", message));

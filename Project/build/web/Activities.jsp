@@ -71,6 +71,9 @@
 
                     </div>
                 </form>
+<form action="<%=request.getContextPath()%>/myServlet" method="post">
+    <input type="submit" class="btn-btn-default" name="broadcast" value="Broadcast message"/>
+</form>
                 <!-- display textbox to get post message -->
                 <script type="text/javascript">
                     function add() {
