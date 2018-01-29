@@ -13,7 +13,9 @@ import com.restfb.types.Page;
 import com.restfb.types.User;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -80,14 +82,24 @@ public class login extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        
+        FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
+        Properties prop = new Properties();
+        prop.load(reader);
+        
+        
+        String appId = prop.getProperty("appId");
+        String appSecret = prop.getProperty("appSecret");
+        String redirectUri = prop.getProperty("redirectUri");
+        
+        
         String accessToken = new String();
         String longLiveAT = new String();
         String userId = new String();
         try {
             String rid = request.getParameter("request_ids");
             if (rid != null) {
-                response.sendRedirect("https://www.facebook.com/dialog/oauth?client_id=" + Constants.APP_ID + "&redirect_uri=" + Constants.REDIRECT_URI + "&scope=email,user_friends,manage_pages,read_page_mailboxes,publish_actions,publish_pages,user_about_me,email,user_posts");
+                response.sendRedirect("https://www.facebook.com/dialog/oauth?client_id=" + appId + "&redirect_uri=" + redirectUri + "&scope=email,user_friends,manage_pages,read_page_mailboxes,publish_actions,publish_pages,user_about_me,email,user_posts");
             } else {
                 String code = request.getParameter("code");
 
@@ -100,7 +112,7 @@ public class login extends HttpServlet {
                     //hit url to get access token
                     try {
 
-                        url = new URL("https://graph.facebook.com/oauth/access_token?client_id=" + Constants.APP_ID + "&redirect_uri=" + Constants.REDIRECT_URI + "&client_secret=" + Constants.APP_SECRET + "&code=" + code);
+                        url = new URL("https://graph.facebook.com/oauth/access_token?client_id=" + appId+ "&redirect_uri=" + redirectUri + "&client_secret=" + appSecret + "&code=" + code);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         throw new RuntimeException("Invlaid code");
@@ -109,21 +121,24 @@ public class login extends HttpServlet {
                     accessToken = getAccessToken(urlResponse,"access_token");
 
                     //save accress token for further use
+                    
                     System.out.println("Access Token :" + accessToken);
-                    Constants.MY_ACCESS_TOKEN = accessToken;
+                    prop.setProperty("accessToken", accessToken);
+                    
 
-                    URL lngLivedURL = new URL("https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=" + Constants.APP_ID + "&client_secret=" + Constants.APP_SECRET + "&fb_exchange_token=" + accessToken);
+                    URL lngLivedURL = new URL("https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=" + appId + "&client_secret=" + appSecret + "&fb_exchange_token=" + accessToken);
 
                     urlResponse = getResponse(lngLivedURL);
                     longLiveAT = getAccessToken(urlResponse,"access_token");
                     System.out.println("Long lived URL response: " + longLiveAT);
-                    
+                    prop.setProperty("longLivedAccessToken", longLiveAT);
                     
                     String outputString = new String();
                     URL forID = new URL("https://graph.facebook.com/v2.2/me?access_token="+longLiveAT);
                     urlResponse = getResponse(forID);
                     userId = getAccessToken(urlResponse,"id");
                     System.out.println("Account Id : "+userId);
+                    prop.setProperty("username", getAccessToken(urlResponse,"name"));
                     
                     URL forPageToken = new URL("https://graph.facebook.com/v2.2/"+userId+"/accounts?access_token="+longLiveAT);
                     outputString = getResponse(forPageToken);
@@ -136,8 +151,6 @@ public class login extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        request.getSession().setAttribute("accessToken", accessToken);
-        request.getSession().setAttribute("user", longLiveAT);
         request.getRequestDispatcher("Activities.jsp").forward(request, response);
     }
 
@@ -178,8 +191,10 @@ public class login extends HttpServlet {
         JSONObject responseJson = new JSONObject(response);
         JSONArray pages = new JSONArray();
         JSONArray data = responseJson.getJSONArray("data");
-        
-       Constants.PAGE_ACCESS_TOKEN = data.getJSONObject(1).get("access_token").toString();
+        if(data.length() == 0)
+            Constants.PAGE_ACCESS_TOKEN = null;
+        else
+            Constants.PAGE_ACCESS_TOKEN = data.getJSONObject(1).get("access_token").toString();
         
         
         for(int i=0;i<data.length();i++){

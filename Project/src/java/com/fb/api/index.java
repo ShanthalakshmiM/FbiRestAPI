@@ -87,6 +87,7 @@ public class index extends HttpServlet {
                     System.out.println("Values : " + value);
                     JSONObject from = value.getJSONObject("from");
                     String postContent = value.getString("message");
+                   
                     String sender = from.getString("name");
                     System.out.println(sender + " : " + postContent);
                 } else {

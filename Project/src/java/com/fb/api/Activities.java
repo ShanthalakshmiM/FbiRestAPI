@@ -41,13 +41,13 @@ import org.json.JSONObject;
  */
 public class Activities {
 
-    static JSONObject customerDetails = new JSONObject();
-    static FacebookClient fbclient = new DefaultFacebookClient(Constants.MY_ACCESS_TOKEN);
+    
+     FacebookClient fbclient = new DefaultFacebookClient(Constants.MY_ACCESS_TOKEN);
 
     //client with page access token 
-    static FacebookClient fbPageClient = new DefaultFacebookClient(Constants.PAGE_ACCESS_TOKEN);
+     FacebookClient fbPageClient = new DefaultFacebookClient(Constants.PAGE_ACCESS_TOKEN);
 
-    public static String makePost(String fbmessage) {
+    public  String makePost(String fbmessage) {
         String postStatus = new String();
         //publish post with page ID and get post ID from response
         FacebookType postResponse = fbPageClient.publish(Constants.PAGE_ID + "/feed", FacebookType.class, Parameter.with("message", fbmessage));
@@ -60,7 +60,7 @@ public class Activities {
         return postStatus;
     }
 
-    public static JSONArray getAllPostComments() throws JSONException {
+    public  JSONArray getAllPostComments() throws JSONException {
         //to hold the comments of all posts
 
         JSONArray pagePosts = new JSONArray();
@@ -111,13 +111,13 @@ public class Activities {
         return pagePosts;
     }
 
-    public static String replyToComment(String commentId) {
+    public String replyToComment(String commentId) {
         fbPageClient.publish(commentId + "/comments", String.class, Parameter.with("message", "reply through api"));
         return "success";
     }
-    public static JSONArray availCustomers = new JSONArray();
+   
 
-    public static JSONArray getConversations() throws JSONException {
+    public JSONArray getConversations() throws JSONException {
         System.out.println("PAT : " + Constants.PAGE_ACCESS_TOKEN);
         JSONArray customers = new JSONArray();
         String id = new String();
@@ -160,7 +160,7 @@ public class Activities {
         return receivedConvos;
     }
 
-    public static String postToPage(String message) {
+    public String postToPage(String message) {
         String status = new String();
         System.out.println("PAT : " + Constants.PAGE_ACCESS_TOKEN);
         FacebookType response = fbPageClient.publish(Constants.PAGE_ID + "/feed", FacebookType.class, Parameter.with("message", message));
@@ -171,7 +171,7 @@ public class Activities {
         return status;
     }
 
-    public static String sendMessage(String id, String message) throws JSONException {
+    public String sendMessage(String id, String message) throws JSONException {
         // com.restfb.types.send.Message msg = new com.restfb.types.send.Message(message);
 //        MediaAttachment image = new MediaAttachment(MediaAttachment.Type.IMAGE, "http://restfb.com/documentation/");
 //        com.restfb.types.send.Message msg = new com.restfb.types.send.Message(image);

@@ -19,6 +19,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,9 +67,7 @@ public class myServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // processRequest(request, response);
-
-        //for webhook verification
-        String VERIFY_TOKEN = "Shantha";
+        Activities activitiesObj = new Activities();
 
         String stringToJsp = new String();
 
@@ -75,7 +80,7 @@ public class myServlet extends HttpServlet {
             String message = request.getParameter("StrPost");
             //call function to post on faceboook
             //  stringToJsp = Activities.makePost(message);
-            stringToJsp = Activities.postToPage(message);
+            stringToJsp = activitiesObj.postToPage(message);
             if (stringToJsp != null) {
                 //passing values to jsp page
                 request.getSession().setAttribute("result", stringToJsp);
@@ -88,7 +93,7 @@ public class myServlet extends HttpServlet {
             //function call
             JSONArray messages = null;
             try {
-                messages = Activities.getConversations();
+                messages = activitiesObj.getConversations();
             } catch (JSONException ex) {
                 Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -103,21 +108,21 @@ public class myServlet extends HttpServlet {
 
         //
         if (request.getParameter("btnGetCmnt") != null) {
-            
-            JSONArray posts= new JSONArray();
-          
+
+            JSONArray posts = new JSONArray();
+
             try {
-                posts = Activities.getAllPostComments();
-               
+                posts = activitiesObj.getAllPostComments();
+
             } catch (JSONException ex) {
                 Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
             stringToJsp = posts.toString();
-          
+
             request.getSession().setAttribute("result", stringToJsp);
-         
+
             request.getRequestDispatcher("/forCheck.jsp").forward(request, response);
-     
+
         }
         if (request.getParameter("btnSendMsg") != null) {
 
@@ -125,7 +130,7 @@ public class myServlet extends HttpServlet {
             String recipient = request.getParameter("id");
             String res = new String();
             try {
-                res = Activities.sendMessage(recipient, message);
+                res = activitiesObj.sendMessage(recipient, message);
             } catch (JSONException ex) {
                 Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -137,19 +142,19 @@ public class myServlet extends HttpServlet {
             request.getSession().setAttribute("result", stringToJsp);
             request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
         }
-        if(request.getParameter("btnSndMsg")!= null){
+        if (request.getParameter("btnSndMsg") != null) {
             String message = request.getParameter("strMsg");
             String recipientId = request.getParameter("recipientId");
             try {
-                stringToJsp = Activities.sendMessage(recipientId, message);
+                stringToJsp = activitiesObj.sendMessage(recipientId, message);
             } catch (JSONException ex) {
                 Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
             request.getSession().setAttribute("result", stringToJsp);
             request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
         }
-        if(request.getParameter("btReply")!= null){
-            stringToJsp = Activities.replyToComment("201841883710088_202497246977885");
+        if (request.getParameter("btReply") != null) {
+            stringToJsp = activitiesObj.replyToComment("201841883710088_202497246977885");
             request.getSession().setAttribute("result", stringToJsp);
             request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
         }
@@ -174,7 +179,7 @@ public class myServlet extends HttpServlet {
         JSONObject temp = new JSONObject();
         try {
             temp.put("text", "Broadcast test");
-            temp.put("fallbck_test","Hello friends");
+            temp.put("fallbck_test", "Hello friends");
             dynamicMsg.put("dynamic_text", temp);
         } catch (JSONException ex) {
             Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
@@ -185,26 +190,17 @@ public class myServlet extends HttpServlet {
         } catch (JSONException ex) {
             Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        String urlResponse = new String();
-        
-        if(request.getParameter("broadcast")!= null){
-            try{
-            URL url = new URL("https://graph.facebook.com/v2.11/me/message_creatives?access_token="+Constants.PAGE_ACCESS_TOKEN+"&messages="+data);
-            
-            URLConnection urlConn = url.openConnection();
-            BufferedReader in;
-            in = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-            String inputLine;
-
-            while ((inputLine = in.readLine()) != null) {
-                urlResponse = urlResponse + inputLine;
-            }
-            }
-            catch(Exception e){
-                e.printStackTrace();
-            }
-        }
-        System.out.println("Message Creatives : "+urlResponse);
+      //  CloseableHttpClient httpClient = HttpClients.createDefault();
+        //HttpClient httpClient = HttpClientBuilder.create().build();
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpPost httpPost = new HttpPost("https://graph.facebook.com/v2.11/me/message_creatives?access_token=" + Constants.PAGE_ACCESS_TOKEN);
+        String payload = data.toString();
+        StringEntity stringEntity = new StringEntity(payload);
+        httpPost.setEntity(stringEntity);
+        httpPost.setHeader("Accept", "application/json");
+        httpPost.setHeader("Content-type", "application/json");
+        HttpResponse urlResponse = httpClient.execute(httpPost);
+        System.out.println("Message Creatives : " + urlResponse);
     }
 
     /**

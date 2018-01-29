@@ -55,7 +55,7 @@
             <div class="body">
                 <form action="<%=request.getContextPath()%>/myServlet" method="get">
                     <div class="btn-group-vertical">
-<% Object cust = Activities.availCustomers; %>
+
 
                         <input type="submit" class="btn btn-default" name="btnGetMsg" value="Get messages"/> <br/>
                         <input type="submit" class="btn btn-default" name="btnGetCmnt" value="Get Comments"/><br/>
@@ -117,7 +117,7 @@
                     }
                     function getCustomerDetails(){
                         var spanvar = document.getElementById("myspan");
-                        var customers = '<%= cust %>';
+                       
                         var custJson = JSON.parse(customers);
                       // document.write(customers[0]['convId']);
                         for (var i = 0; i < custJson.length; i++) {
