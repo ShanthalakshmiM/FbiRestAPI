@@ -6,6 +6,7 @@
 package com.fb.api;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -173,13 +174,19 @@ public class myServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         //processRequest(request, response);
+        FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
+        Properties prop = new Properties();
+        prop.load(reader);
+        
+        String pat = prop.getProperty("pageAccessToken");
+
         JSONObject data = new JSONObject();
         JSONArray message = new JSONArray();
         JSONObject dynamicMsg = new JSONObject();
         JSONObject temp = new JSONObject();
         try {
             temp.put("text", "Broadcast test");
-            temp.put("fallbck_test", "Hello friends");
+            temp.put("fallback_text", "Hello friends");
             dynamicMsg.put("dynamic_text", temp);
         } catch (JSONException ex) {
             Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
@@ -193,14 +200,22 @@ public class myServlet extends HttpServlet {
       //  CloseableHttpClient httpClient = HttpClients.createDefault();
         //HttpClient httpClient = HttpClientBuilder.create().build();
         DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost("https://graph.facebook.com/v2.11/me/message_creatives?access_token=" + Constants.PAGE_ACCESS_TOKEN);
+        HttpPost httpPost = new HttpPost("https://graph.facebook.com/v2.11/me/message_creatives?access_token=" + pat);
         String payload = data.toString();
         StringEntity stringEntity = new StringEntity(payload);
         httpPost.setEntity(stringEntity);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
         HttpResponse urlResponse = httpClient.execute(httpPost);
+        System.out.println("Payload : "+payload);
+        
         System.out.println("Message Creatives : " + urlResponse);
+        System.out.println(urlResponse.getStatusLine().toString());
+       
+            JSONObject arr = new JSONObject(urlResponse);
+            System.out.println("Array : "+arr);
+        
+        
     }
 
     /**

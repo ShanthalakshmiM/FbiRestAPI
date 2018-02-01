@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -79,14 +80,17 @@ public class login extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    
+    Properties prop = new Properties();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
-        Properties prop = new Properties();
-        prop.load(reader);
+       // FileWriter writer = new FileWriter("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
         
+        prop.load(reader);
+
         
         String appId = prop.getProperty("appId");
         String appSecret = prop.getProperty("appSecret");
@@ -142,7 +146,7 @@ public class login extends HttpServlet {
                     
                     URL forPageToken = new URL("https://graph.facebook.com/v2.2/"+userId+"/accounts?access_token="+longLiveAT);
                     outputString = getResponse(forPageToken);
-                    
+                    System.out.println("OutputString : "+outputString);
                     System.out.println("Final response : "+getPageATs(outputString).toString());
                 }
 
@@ -151,6 +155,8 @@ public class login extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        prop.store(new FileWriter("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties"), "The end");
+      //  writer.close();
         request.getRequestDispatcher("Activities.jsp").forward(request, response);
     }
 
@@ -192,11 +198,13 @@ public class login extends HttpServlet {
         JSONArray pages = new JSONArray();
         JSONArray data = responseJson.getJSONArray("data");
         if(data.length() == 0)
-            Constants.PAGE_ACCESS_TOKEN = null;
-        else
-            Constants.PAGE_ACCESS_TOKEN = data.getJSONObject(1).get("access_token").toString();
-        
-        
+            prop.setProperty("pageAccessToken", null);
+        else{
+            prop.setProperty("pageAccessToken", data.getJSONObject(1).get("access_token").toString());
+            prop.setProperty("pageId", data.getJSONObject(1).get("id").toString());
+            
+        }
+        System.out.println("In login - Pat : "+prop.getProperty("pageAccessToken"));
         for(int i=0;i<data.length();i++){
             JSONObject pageDetails = new JSONObject();
             pageDetails.put("Token", data.getJSONObject(i).get("access_token"));

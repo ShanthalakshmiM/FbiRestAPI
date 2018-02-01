@@ -4,6 +4,9 @@
     Author     : HP
 --%>
 
+<%@page import="java.io.IOException"%>
+<%@page import="java.util.Properties"%>
+<%@page import="java.io.FileInputStream"%>
 <%@page import="com.fb.api.Constants"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -26,12 +29,28 @@
             
         }
     </style>
+    <%
+
+FileInputStream fis = new FileInputStream("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
+Properties prop = new Properties();
+
+
+try {
+   prop.load(fis);
+} 
+catch (IOException e) {
+    e.printStackTrace();
+}
+
+String appId = prop.getProperty("appId");
+String uri = prop.getProperty("redirectUri");
+%>
     <body
         
         <div id="parent">
             <center>
         <form action="<%= request.getContextPath()%>/login" method="get" id="form">
-            <a href="https://www.facebook.com/dialog/oauth?client_id=<%= Constants.APP_ID%>&redirect_uri=<%= Constants.REDIRECT_URI%>&scope=email,user_friends,manage_pages,read_page_mailboxes,publish_actions,publish_pages,user_about_me,email,user_posts" > <img src="./images/facebookLoginButton.jpg"/> </a>
+            <a href="https://www.facebook.com/dialog/oauth?client_id=<%= appId %>&redirect_uri=<%= uri %>&scope=email,user_friends,manage_pages,read_page_mailboxes,publish_actions,publish_pages,user_about_me,email,user_posts" > <img src="./images/facebookLoginButton.jpg"/> </a>
             
         </form>
             </center>   

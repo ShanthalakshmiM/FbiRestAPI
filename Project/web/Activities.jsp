@@ -46,7 +46,7 @@
         }
     </style>
     <body> 
-        
+
     <center>
         <div>
             <div class="header" >
@@ -59,21 +59,21 @@
 
                         <input type="submit" class="btn btn-default" name="btnGetMsg" value="Get messages"/> <br/>
                         <input type="submit" class="btn btn-default" name="btnGetCmnt" value="Get Comments"/><br/>
-                        <input type="button" class="btn btn-default" onclick="getCustomerDetails();" value="Get customer details"/><br/>
-                        <input type="button" class="btn btn-default" onclick="addForMessage();" value="Send Message"/><br/>
+                        <!--                        <input type="button" class="btn btn-default" onclick="getCustomerDetails();" value="Get customer details"/><br/>-->
+                        <input data-toggle = "collapse" type="button" class="btn btn-default" onclick="addForMessage();" value="Send Message"/><br/>
                         <input type="button" class="btn btn-default"  onclick="add();" value="Post to your page"/> <br/>
-                        <input type="submit" class="btn btn-default" name="btReply" value="Post a reply"/>
+                        <!--                        <input type="submit" class="btn btn-default" name="btReply" value="Post a reply"/>-->
                         <span id="myspan" style="width: 250px; margin-left: 20px; font-weight: bold; float: none;"></span><br/>
 
-                         Enter the recipient id: <input type="text" name="recipientId"/><br/>
-                    Enter the message: <input type="text" name="strMsg" /> <br/>
-                    <input type="submit" name ="btnSndMsg" value="Send Message"/>
+                        Enter the recipient id: <input type="text" name="recipientId"/><br/><br/>
+                        Enter the message: <input type="text" name="strMsg" /> <br/><br/>
+                        <input type="submit" name ="btnSndMsg" value="Send Message"/><br/>
 
                     </div>
+                </form> <br/>
+                <form action="<%=request.getContextPath()%>/myServlet" method="post">
+                    <input type="submit" class="btn-btn-default" name="broadcast" value="Broadcast message"/>
                 </form>
-<form action="<%=request.getContextPath()%>/myServlet" method="post">
-    <input type="submit" class="btn-btn-default" name="broadcast" value="Broadcast message"/>
-</form>
                 <!-- display textbox to get post message -->
                 <script type="text/javascript">
                     function add() {
@@ -96,9 +96,9 @@
 
                     function addForMessage() {
                         var spanvar = document.getElementById("myspan");
-                      //var customers = new Activities.getCustomerDetails();
-                       // document.writeln(customers);
-                        
+                        //var customers = new Activities.getCustomerDetails();
+                        // document.writeln(customers);
+
                         var element = document.createElement("input");
                         element.setAttribute("type", "textarea");
                         element.setAttribute("name", "StrMessage");
@@ -115,44 +115,10 @@
                         element.setAttribute("class", "btn btn-default");
                         spanvar.appendChild(element);
                     }
-                    function getCustomerDetails(){
-                        var spanvar = document.getElementById("myspan");
-                       
-                        var custJson = JSON.parse(customers);
-                      // document.write(customers[0]['convId']);
-                        for (var i = 0; i < custJson.length; i++) {
-                            var checkbox = document.createElement("input");
-                            checkbox.type = "checkbox";
-                            checkbox.name = "name"+i;
-                         //  checkbox.value = customers[0][convId];
-                           // checkbox.id = "id" + i;
-                            spanvar.appendChild(checkbox);
-                            var label = document.createElement("label");
-                            label.appendChild(document.createTextNode(custJson[i]['senderName']));
-                             spanvar.appendChild(label);
-                            var br = document.createElement('br');
-                            spanvar.appendChild(br);
-
-                        }
-                    }
 
                 </script>
-<!--                <div>
-                    <p>
-                        
-                    </p>
-                </div>-->
 
-            </div>
+                </center>
 
-                        <div>
-                            <p>
-                                <%= session.getAttribute("username") %>
-                            </p>
-                        </div>     
-        </div>
-
-    </center>
-
-</body>
-</html>
+                </body>
+                </html>
