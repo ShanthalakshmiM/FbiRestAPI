@@ -53,68 +53,51 @@
                 <h3 align="right" style="padding-right: 15px" class="text-white">Communicate with facebook</h3>      
             </div>
             <div class="body">
-                <form action="<%=request.getContextPath()%>/myServlet" method="get">
-                    <div class="btn-group-vertical">
 
 
-                        <input type="submit" class="btn btn-default" name="btnGetMsg" value="Get messages"/> <br/>
-                        <input type="submit" class="btn btn-default" name="btnGetCmnt" value="Get Comments"/><br/>
-                        <!--                        <input type="button" class="btn btn-default" onclick="getCustomerDetails();" value="Get customer details"/><br/>-->
-                        <input data-toggle = "collapse" type="button" class="btn btn-default" onclick="addForMessage();" value="Send Message"/><br/>
-                        <input type="button" class="btn btn-default"  onclick="add();" value="Post to your page"/> <br/>
-                        <!--                        <input type="submit" class="btn btn-default" name="btReply" value="Post a reply"/>-->
-                        <span id="myspan" style="width: 250px; margin-left: 20px; font-weight: bold; float: none;"></span><br/>
+                <div class="btn-group-vertical">
+                    <button type="button"  data-toggle="collapse" data-target="#forPost">Post to your page</button> <br/><br/>
+                    <button type="button"  data-toggle="collapse" data-target="#forMessage">Send Message</button> <br/><br/>
+                    <form action="<%=request.getContextPath()%>/myServlet" method="get">
+                        <div class = "collapse" id = "forPost">
+                            <input type="text" name="strPost"/><br/>
+                            <input type="submit" value="Post"/> <br/><br/>
+                        </div>
+                        <div class = "collapse" id = "forMessage">
+                            Enter the recipient id: <input type="text" name="recipientId"/><br/><br/>
+                            Enter the message: <input type="text" name="strMsg" /> <br/><br/>
+                            <input type="submit" name ="btnSndMsg" value="Send"/><br/><br/>
+                        </div>
 
-                        Enter the recipient id: <input type="text" name="recipientId"/><br/><br/>
-                        Enter the message: <input type="text" name="strMsg" /> <br/><br/>
-                        <input type="submit" name ="btnSndMsg" value="Send Message"/><br/>
+                        <input type="submit" class="btn btn-default" name="btnGetMsg" value="Get messages"/> <br/><br/>
+                        <input type="submit" class="btn btn-default" name="btnGetCmnt" value="Get Comments"/><br/><br/>
+ <!--                        <input type="button" class="btn btn-default" onclick="getCustomerDetails();" value="Get customer details"/><br/>-->
+ <!--                        <input type="submit" class="btn btn-default" name="btReply" value="Post a reply"/>-->
+                </div>
 
-                    </div>
-                </form> <br/>
+                </form> 
+
+
                 <form action="<%=request.getContextPath()%>/myServlet" method="post">
                     <input type="submit" class="btn-btn-default" name="broadcast" value="Broadcast message"/>
                 </form>
                 <!-- display textbox to get post message -->
                 <script type="text/javascript">
-                    function add() {
-                        var element = document.createElement("input");
-                        element.setAttribute("type", "textarea");
-                        element.setAttribute("name", "StrPost");
-                        var spanvar = document.getElementById("myspan");
-                        spanvar.appendChild(element);
-                        var br = document.createElement('br');
-                        var br2 = document.createElement('br');
-                        spanvar.appendChild(br);
-                        spanvar.appendChild(br2);
-                        var element = document.createElement("input");
-                        element.setAttribute("type", "submit");
-                        element.setAttribute("name", "btnPost");
-                        element.setAttribute("value", "Post");
-                        element.setAttribute("class", "btn btn-default");
-                        spanvar.appendChild(element);
+                    var acc = document.getElementsByClassName("accordion");
+                    var i;
+
+                    for (i = 0; i < acc.length; i++) {
+                        acc[i].addEventListener("click", function () {
+                            this.classList.toggle("active");
+                            var panel = this.nextElementSibling;
+                            if (panel.style.display === "block") {
+                                panel.style.display = "none";
+                            } else {
+                                panel.style.display = "block";
+                            }
+                        });
                     }
 
-                    function addForMessage() {
-                        var spanvar = document.getElementById("myspan");
-                        //var customers = new Activities.getCustomerDetails();
-                        // document.writeln(customers);
-
-                        var element = document.createElement("input");
-                        element.setAttribute("type", "textarea");
-                        element.setAttribute("name", "StrMessage");
-
-                        spanvar.appendChild(element);
-                        var br = document.createElement('br');
-                        var br2 = document.createElement('br');
-                        spanvar.appendChild(br);
-                        spanvar.appendChild(br2);
-                        var element = document.createElement("input");
-                        element.setAttribute("type", "submit");
-                        element.setAttribute("name", "btnSendMsg");
-                        element.setAttribute("value", "Send");
-                        element.setAttribute("class", "btn btn-default");
-                        spanvar.appendChild(element);
-                    }
 
                 </script>
 

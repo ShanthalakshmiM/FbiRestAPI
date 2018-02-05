@@ -212,8 +212,10 @@ public class myServlet extends HttpServlet {
         System.out.println("Message Creatives : " + urlResponse);
         System.out.println(urlResponse.getStatusLine().toString());
        
-            JSONObject arr = new JSONObject(urlResponse);
-            System.out.println("Array : "+arr);
+            JSONObject jsonObj = new JSONObject(urlResponse);
+            System.out.println("Array : "+jsonObj);
+            String id = new String();
+            
         
         
     }
