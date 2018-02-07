@@ -30,6 +30,7 @@ import java.net.URLEncoder;
 import java.util.Properties;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +55,8 @@ public class login extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    int i = 1;
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -80,26 +83,30 @@ public class login extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    
     Properties prop = new Properties();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String path = getServletContext()+"";
+        System.out.println("Path : "+path);
         
+        String filename = "config" + String.valueOf(i) + ".properties";
         FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
-       // FileWriter writer = new FileWriter("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
+        // FileWriter writer = new FileWriter("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
         
         prop.load(reader);
-
+        
+        Cookie ck_num = new Cookie("num", String.valueOf(i++));
         
         String appId = prop.getProperty("appId");
         String appSecret = prop.getProperty("appSecret");
         String redirectUri = prop.getProperty("redirectUri");
         
-        
         String accessToken = new String();
         String longLiveAT = new String();
         String userId = new String();
+        String userName = new String();
         try {
             String rid = request.getParameter("request_ids");
             if (rid != null) {
@@ -115,51 +122,56 @@ public class login extends HttpServlet {
 
                     //hit url to get access token
                     try {
-
-                        url = new URL("https://graph.facebook.com/oauth/access_token?client_id=" + appId+ "&redirect_uri=" + redirectUri + "&client_secret=" + appSecret + "&code=" + code);
+                        
+                        url = new URL("https://graph.facebook.com/oauth/access_token?client_id=" + appId + "&redirect_uri=" + redirectUri + "&client_secret=" + appSecret + "&code=" + code);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         throw new RuntimeException("Invlaid code");
                     }
                     String urlResponse = getResponse(url);
-                    accessToken = getAccessToken(urlResponse,"access_token");
+                    accessToken = getAccessToken(urlResponse, "access_token");
 
                     //save accress token for further use
-                    
                     System.out.println("Access Token :" + accessToken);
                     prop.setProperty("accessToken", accessToken);
                     
-
                     URL lngLivedURL = new URL("https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=" + appId + "&client_secret=" + appSecret + "&fb_exchange_token=" + accessToken);
-
+                    
                     urlResponse = getResponse(lngLivedURL);
-                    longLiveAT = getAccessToken(urlResponse,"access_token");
+                    longLiveAT = getAccessToken(urlResponse, "access_token");
                     System.out.println("Long lived URL response: " + longLiveAT);
                     prop.setProperty("longLivedAccessToken", longLiveAT);
                     
                     String outputString = new String();
-                    URL forID = new URL("https://graph.facebook.com/v2.2/me?access_token="+longLiveAT);
+                    URL forID = new URL("https://graph.facebook.com/v2.2/me?access_token=" + longLiveAT);
                     urlResponse = getResponse(forID);
-                    userId = getAccessToken(urlResponse,"id");
-                    System.out.println("Account Id : "+userId);
-                    prop.setProperty("username", getAccessToken(urlResponse,"name"));
+                    userId = getAccessToken(urlResponse, "id");
+                    userName = getAccessToken(urlResponse, "name");
+                    System.out.println("Account Id : " + userId);
+                    prop.setProperty("username", userName);
                     
-                    URL forPageToken = new URL("https://graph.facebook.com/v2.2/"+userId+"/accounts?access_token="+longLiveAT);
+                    
+                    URL forPageToken = new URL("https://graph.facebook.com/v2.2/" + userId + "/accounts?access_token=" + longLiveAT);
                     outputString = getResponse(forPageToken);
-                    System.out.println("OutputString : "+outputString);
-                    System.out.println("Final response : "+getPageATs(outputString).toString());
+                    System.out.println("OutputString : " + outputString);
+                    System.out.println("Final response : " + getPageATs(outputString).toString());
                 }
-
+                
             }
-
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
         prop.store(new FileWriter("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties"), "The end");
-      //  writer.close();
+        //  writer.close();
+        
+        Cookie ck_uname = new Cookie("uname", userName);
+        response.addCookie(ck_num);
+        response.addCookie(ck_uname);
+        
         request.getRequestDispatcher("Activities.jsp").forward(request, response);
     }
-
+    
     public String getResponse(URL url) {
         String response = new String();
         
@@ -172,7 +184,7 @@ public class login extends HttpServlet {
             in = new BufferedReader(new InputStreamReader(
                     fbConnection.getInputStream()));
             String inputLine;
-
+            
             while ((inputLine = in.readLine()) != null) {
                 response = response + inputLine;
             }
@@ -186,30 +198,30 @@ public class login extends HttpServlet {
         
         return response;
     }
-
-    public String getAccessToken(String response, String key) throws JSONException {    
-            JSONObject responseJson = new JSONObject(response);
-            String accessToken = responseJson.getString(key);
+    
+    public String getAccessToken(String response, String key) throws JSONException {        
+        JSONObject responseJson = new JSONObject(response);
+        String accessToken = responseJson.getString(key);
         return accessToken;
     }
     
-    public JSONArray getPageATs(String response) throws JSONException{
+    public JSONArray getPageATs(String response) throws JSONException {
         JSONObject responseJson = new JSONObject(response);
         JSONArray pages = new JSONArray();
         JSONArray data = responseJson.getJSONArray("data");
-        if(data.length() == 0)
+        if (data.length() == 0) {
             prop.setProperty("pageAccessToken", null);
-        else{
+        } else {
             prop.setProperty("pageAccessToken", data.getJSONObject(1).get("access_token").toString());
             prop.setProperty("pageId", data.getJSONObject(1).get("id").toString());
             
         }
-        System.out.println("In login - Pat : "+prop.getProperty("pageAccessToken"));
-        for(int i=0;i<data.length();i++){
+        System.out.println("In login - Pat : " + prop.getProperty("pageAccessToken"));
+        for (int i = 0; i < data.length(); i++) {
             JSONObject pageDetails = new JSONObject();
             pageDetails.put("Token", data.getJSONObject(i).get("access_token"));
             pageDetails.put("Name", data.getJSONObject(i).get("name"));
-            pageDetails.put("ID",data.getJSONObject(i).get("id"));
+            pageDetails.put("ID", data.getJSONObject(i).get("id"));
             pages.put(pageDetails);
         }
         return pages;

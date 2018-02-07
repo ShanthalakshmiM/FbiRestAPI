@@ -60,8 +60,8 @@
                     <button type="button"  data-toggle="collapse" data-target="#forMessage">Send Message</button> <br/><br/>
                     <form action="<%=request.getContextPath()%>/myServlet" method="get">
                         <div class = "collapse" id = "forPost">
-                            <input type="text" name="strPost"/><br/>
-                            <input type="submit" value="Post"/> <br/><br/>
+                            <input type="text" name="StrPost"/><br/><br/>
+                            <input type="submit" value="Post" name="btnPost"/> <br/><br/>
                         </div>
                         <div class = "collapse" id = "forMessage">
                             Enter the recipient id: <input type="text" name="recipientId"/><br/><br/>

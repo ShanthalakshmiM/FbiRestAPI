@@ -81,7 +81,7 @@ public class index extends HttpServlet {
 
         DefaultJsonMapper mapper = new DefaultJsonMapper();
         WebhookObject webhookObject = mapper.toJavaObject(sb.toString(), WebhookObject.class);
-        //  System.out.println("webhookObject : " + webhookObject.toString());
+         // System.out.println("webhookObject : " + webhookObject.toString());
         for (WebhookEntry entry : webhookObject.getEntryList()) {
             if (!entry.getMessaging().isEmpty()) {
               //  System.out.println("*********************");
@@ -103,20 +103,33 @@ public class index extends HttpServlet {
 
             } //System.out.println("check1");
             else {
-                System.out.println("In else");
+               // System.out.println("In else");
 
                 for (Change change : entry.getChanges()) {
                     if (change.getField().equals("feed")) {
                         JSONObject webhookResponse = new JSONObject(sb.toString());
                         JSONArray entryJson = webhookResponse.getJSONArray("entry");
                         JSONArray changes = entryJson.getJSONObject(0).getJSONArray("changes");
+//                        System.out.println("Changes : "+changes);
                         JSONObject value = changes.getJSONObject(0).getJSONObject("value");
-                        //   System.out.println("Values : " + value);
                         JSONObject from = value.getJSONObject("from");
-                        String postContent = value.getString("message");
-
                         String sender = from.getString("name");
-                        System.out.println(sender + " --- " + postContent);
+//                        System.out.println("Values : "+value);
+                        String item = value.getString("item");
+                        
+                        if(item.equals("reaction")){
+                            String reac_type = value.getString("reaction_type");
+                            if(reac_type.equals("like"))
+                                 System.out.println(sender+" liked your post");
+                            else
+                                 System.out.println(sender+" reacted "+reac_type+" to your post");
+                       
+                       }
+                        else if(item.equals("comment")){
+                               String postContent = value.getString("message");
+                                System.out.println(sender+" : "+postContent);
+                        }
+                        
                     }
 
                 }

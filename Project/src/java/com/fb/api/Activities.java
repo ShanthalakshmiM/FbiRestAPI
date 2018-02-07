@@ -80,8 +80,7 @@ public class Activities {
         //to hold the comments of all posts
 
         JSONArray pagePosts = new JSONArray();
-//        String postId = new String();
-//        String postMsg = new String();
+
         //fetch all the posts
         Connection<Post> pageFeed = fbPageClient.fetchConnection(pageId+ "/feed", Post.class);
         System.out.println("---"+pageFeed);
@@ -98,7 +97,7 @@ public class Activities {
 
                     List<Comment> cmntList = cmntDetails.getData();
                     if(cmntList.size() > 0){
-                       System.out.println("Comment Details : " + post.getMessage()+"---"+cmntList);
+                     //  System.out.println("Comment Details : " + post.getMessage()+"---"+cmntList);
                        JSONObject newCmnts = new JSONObject();
                        JSONArray receivedCmnts = new JSONArray();
                        for (Comment comment : cmntList) {
@@ -119,7 +118,7 @@ public class Activities {
                         }
                        newCmnts.put("postMessage", post.getMessage());
                        newCmnts.put("comments", receivedCmnts);
-                       // System.out.println("==="+newCmnts);
+                       
                        pagePosts.put(newCmnts);
                        
                        
@@ -155,16 +154,16 @@ public class Activities {
         //fetch users sent message to your page
         Message m = null;
         Connection<Conversation> connection = fbPageClient.fetchConnection("me/conversations", Conversation.class);
-        // Connection<Conversation> connection = fbPageClient.fetchConnection("me/conversations", Conversation.class);
+       
 
         JSONArray receivedConvos = new JSONArray();
         for (List<Conversation> conversationPage : connection) {
             for (Conversation convo : conversationPage) {
-
+                System.out.println("Convo : "+convo);
                 JSONArray receivedMsgs = new JSONArray();
                 id = convo.getId();
                 Connection<Message> messages = fbPageClient.fetchConnection(id + "/messages", Message.class, Parameter.with("fields", "message, created_time, from, id"));
-                //System.out.println("Activities.java : Messages : " + messages.toString());
+                System.out.println("Activities.java : Messages : " + messages.toString());
                 try {
 
                     List<Message> data = messages.getData();

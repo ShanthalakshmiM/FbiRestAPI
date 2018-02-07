@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,8 +73,10 @@ public class myServlet extends HttpServlet {
         Activities activitiesObj = new Activities();
 
         String stringToJsp = new String();
+        System.out.println("Path : " + getServletContext().getResourceAsStream("/WEB-INF/config.properties"));
 
         Properties prop = new Properties();
+
         prop.load(getServletContext().getResourceAsStream("/WEB-INF/config.properties"));
         String token = prop.getProperty("access_token");
 
@@ -80,7 +84,6 @@ public class myServlet extends HttpServlet {
         if (request.getParameter("btnPost") != null) {
             String message = request.getParameter("StrPost");
             //call function to post on faceboook
-            //  stringToJsp = Activities.makePost(message);
             stringToJsp = activitiesObj.postToPage(message);
             if (stringToJsp != null) {
                 //passing values to jsp page
@@ -107,7 +110,6 @@ public class myServlet extends HttpServlet {
             }
         }
 
-        //
         if (request.getParameter("btnGetCmnt") != null) {
 
             JSONArray posts = new JSONArray();
@@ -124,24 +126,6 @@ public class myServlet extends HttpServlet {
 
             request.getRequestDispatcher("/forCheck.jsp").forward(request, response);
 
-        }
-        if (request.getParameter("btnSendMsg") != null) {
-
-            String message = request.getParameter("StrMessage");
-            String recipient = request.getParameter("id");
-            String res = new String();
-            try {
-                res = activitiesObj.sendMessage(recipient, message);
-            } catch (JSONException ex) {
-                Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            if (res != null) {
-                stringToJsp = "Message sent";
-            } else {
-                stringToJsp = "Error";
-            }
-            request.getSession().setAttribute("result", stringToJsp);
-            request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
         }
         if (request.getParameter("btnSndMsg") != null) {
             String message = request.getParameter("strMsg");
@@ -177,7 +161,7 @@ public class myServlet extends HttpServlet {
         FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
         Properties prop = new Properties();
         prop.load(reader);
-        
+
         String pat = prop.getProperty("pageAccessToken");
 
         JSONObject data = new JSONObject();
@@ -197,29 +181,46 @@ public class myServlet extends HttpServlet {
         } catch (JSONException ex) {
             Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-      //  CloseableHttpClient httpClient = HttpClients.createDefault();
-        //HttpClient httpClient = HttpClientBuilder.create().build();
+        
+        String msgCreativesUrl = "https://graph.facebook.com/v2.11/me/message_creatives?access_token=" + pat;
+        
+        HttpResponse urlResponse = sendPost(msgCreativesUrl, data.toString());
+         String response_id = EntityUtils.toString(urlResponse.getEntity());
+        JSONObject jsonObj = null;
+        try {
+            jsonObj = new JSONObject(response_id);
+        } catch (JSONException ex) {
+            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("Message Creatives ID : " + response_id);
+        JSONObject bd_payload = new JSONObject();
+        try {
+            bd_payload.put("message_creative_id", jsonObj.get("message_creative_id"));
+        } catch (JSONException ex) {
+            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("request : " + bd_payload.toString());
+        String broadcastUrl = "https://graph.facebook.com/v2.11/me/broadcast_messages?access_token=" + pat;
+        HttpResponse Response = sendPost(broadcastUrl, bd_payload.toString());
+        System.out.println(Response.toString());
+
+    }
+    public HttpResponse sendPost(String url, String data) throws UnsupportedEncodingException{
         DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost("https://graph.facebook.com/v2.11/me/message_creatives?access_token=" + pat);
-        String payload = data.toString();
-        StringEntity stringEntity = new StringEntity(payload);
+        HttpPost httpPost = new HttpPost(url);
+         StringEntity stringEntity = new StringEntity(data);
         httpPost.setEntity(stringEntity);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
-        HttpResponse urlResponse = httpClient.execute(httpPost);
-        System.out.println("Payload : "+payload);
-        
-        System.out.println("Message Creatives : " + urlResponse);
-        System.out.println(urlResponse.getStatusLine().toString());
-       
-            JSONObject jsonObj = new JSONObject(urlResponse);
-            System.out.println("Array : "+jsonObj);
-            String id = new String();
-            
-        
-        
+        HttpResponse urlResponse = null;
+        try {
+            urlResponse = httpClient.execute(httpPost);
+        } catch (IOException ex) {
+            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      
+        return urlResponse;
     }
-
     /**
      * Returns a short description of the servlet.
      *
