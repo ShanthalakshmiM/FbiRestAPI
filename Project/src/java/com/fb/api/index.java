@@ -91,14 +91,14 @@ public class index extends HttpServlet {
                     System.out.println(senderId + " ---- " + message);
                     
                     //System.out.println("----------------");
-                    
-                    Message simpleTextMessage = new Message("reply" +item.getMessage().getText());
-                    IdMessageRecipient recipient = new IdMessageRecipient(senderId);
-                    FacebookClient sendClient = new DefaultFacebookClient(prop.getProperty("pageAccessToken"));
-                   GraphResponse resp =  sendClient.publish("me/messages", GraphResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", simpleTextMessage));
-                   
-                   if(resp == null)
-                        System.out.println("Resp is null");
+//                    
+//                    Message simpleTextMessage = new Message("reply" +item.getMessage().getText());
+//                    IdMessageRecipient recipient = new IdMessageRecipient(senderId);
+//                    FacebookClient sendClient = new DefaultFacebookClient(prop.getProperty("pageAccessToken"));
+//                   GraphResponse resp =  sendClient.publish("me/messages", GraphResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", simpleTextMessage));
+//                   
+//                   if(resp == null)
+//                        System.out.println("Resp is null");
                 }
 
             } //System.out.println("check1");

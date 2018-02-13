@@ -18,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.Cookie;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -35,12 +36,13 @@ public class Test {
     
     
     public static void main(String[] args) throws UnsupportedEncodingException, IOException, JSONException{
-        MongoClient mongo = new MongoClient("localhost",27017);
-        DB db = mongo.getDB("testDb");
-        DBCollection collection = db.getCollection("testEnterprise");
-        
+//        MongoClient mongo = new MongoClient("localhost",27017);
+//        DB db = mongo.getDB("testDb");
+//        DBCollection collection = db.getCollection("testEnterprise");
+//        
 //        BasicDBObject document = new BasicDBObject();
-//        document.put("username", "Shantha");
+//        document.put("username", "Nivi");
+//        document.put("userId","2447792828779257");
 //        
 //        BasicDBObject accessToken = new BasicDBObject();
 //        accessToken.put("accessToken", "ATForTest");
@@ -54,15 +56,40 @@ public class Test {
 //        accessToken.put("PageAccessTokens",pageDetails);
 //        document.put("accessToken",accessToken);
 //        
-//        collection.save(document);
-        System.out.println("----Inserted----");
-        
-        DBCursor cursor = collection.find();
-        System.out.println("Retrieved "+cursor.count());
-        while(cursor.hasNext()){
-            System.out.println(cursor.next());
-        }
-            
+//        
+//        BasicDBObject query = new BasicDBObject("userId", "2447792828779257");
+//        DBCursor cursor = collection.find(query);
+//        System.out.println("Retrieved "+cursor.count());
+////        while(cursor.hasNext()){
+//////            BasicDBObject savedObj = (BasicDBObject)cursor.next();
+////            String savedUsername = savedObj.getString("username");
+////            if(savedUsername.equals("Nivi"))
+////                System.out.println("Record already exists");
+////            else{
+////                collection.save(document);
+////                System.out.println("Inserted");
+////            }
+////            
+////                System.out.println(cursor.next());
+//            
+////        }
+////collection.save(document);
+//            
+//        if(cursor.count()>1){
+//            System.out.println("More than 1 record");
+//        }
+//        else{
+//            BasicDBObject savedData = (BasicDBObject)cursor.next();
+//            System.out.println(savedData.toString());
+//            JSONObject temp =(JSONObject)savedData.get("_id");
+//            System.out.println(temp.toString());
+//            JSONArray savedPageDetails = (JSONArray) savedData.get("PageAccessTokens");
+//            System.out.println(savedPageDetails.toString());
+//        }
+
+
+        Cookie ck = new Cookie("userName", "Shantha");
         
     }
+
 }

@@ -5,13 +5,18 @@
  */
 package com.fb.api;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.MongoClient;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.DefaultJsonMapper;
 import com.restfb.FacebookClient;
 import com.restfb.JsonMapper;
 import com.restfb.Parameter;
-import com.restfb.json.JsonObject;
+
 import com.restfb.types.Comment;
 import com.restfb.types.Conversation;
 import com.restfb.types.FacebookType;
@@ -32,9 +37,16 @@ import com.sun.corba.se.spi.presentation.rmi.StubAdapter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.HttpCookie;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import javax.servlet.http.Cookie;
+import javax.websocket.Session;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,67 +57,87 @@ import org.json.JSONObject;
  */
 public class Activities {
 
-    
-   
-
     //client with page access token 
-     FacebookClient fbPageClient;
-     String pageId;
-      public Activities() throws FileNotFoundException, IOException {
+    FacebookClient fbPageClient;
+    String pageId;
+   // private String userId;
+
+    public Activities(String cookieValue) throws FileNotFoundException, IOException {
         System.out.println("Constructor called");
         FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
         Properties prop = new Properties();
-        
         prop.load(reader);
         String pat = prop.getProperty("pageAccessToken");
-         this.fbPageClient = new DefaultFacebookClient(pat);
-         System.out.println("In activities - Pat : "+prop.getProperty("pageAccessToken"));
-         this.pageId = prop.getProperty("pageId");
+        this.fbPageClient = new DefaultFacebookClient(pat);
+        System.out.println("In activities - Pat : " + prop.getProperty("pageAccessToken"));
+        this.pageId = prop.getProperty("pageId");
+       // this.userId = cookieValue;
+        getDbValues(cookieValue);
+        
+        
     }
-   
-    public  String makePost(String fbmessage) {
+
+    public void getDbValues(String userId) throws UnknownHostException {
+        MongoClient mongoClient = new MongoClient("localhost", 27017);
+        DB db = mongoClient.getDB("testDb");
+        DBCollection collection = db.getCollection("testEnterprise");
+
+        BasicDBObject query = new BasicDBObject("userId", userId);
+        DBCursor cursor = collection.find(query);
+        if (cursor.count() > 1) {
+            throw new RuntimeException("More than 1 record found matching the user ID");
+        } 
+        else if(cursor.count()==0){
+            throw new RuntimeException("No records found matching"+userId);
+        }
+        else {
+            BasicDBObject savedDetails = (BasicDBObject) cursor.next();
+            JSONArray savedPageDetails = (JSONArray) savedDetails.get("PageAccessTokens");
+        }
+    }
+
+    public String makePost(String fbmessage) {
+
         String postStatus = new String();
         //publish post with page ID and get post ID from response
-        FacebookType postResponse = fbPageClient.publish(pageId+ "/feed", FacebookType.class, Parameter.with("message", fbmessage));
+        FacebookType postResponse = fbPageClient.publish(pageId + "/feed", FacebookType.class, Parameter.with("message", fbmessage));
 
         if (postResponse.getId() != null || !(postResponse.getId().equals(""))) {
 
-          
             postStatus = "Status posted successfully in your page";
         }
         return postStatus;
     }
 
-    public  JSONArray getAllPostComments() throws JSONException {
+    public JSONArray getAllPostComments() throws JSONException {
         //to hold the comments of all posts
 
         JSONArray pagePosts = new JSONArray();
 
         //fetch all the posts
-        Connection<Post> pageFeed = fbPageClient.fetchConnection(pageId+ "/feed", Post.class);
-        System.out.println("---"+pageFeed);
+        Connection<Post> pageFeed = fbPageClient.fetchConnection(pageId + "/feed", Post.class);
+        System.out.println("---" + pageFeed);
         for (List<Post> feed : pageFeed) {
 
             for (Post post : feed) {
                 //for ech post
                 JSONObject posts = new JSONObject();
-                
-           
+
                 Connection<Comment> cmntDetails = fbPageClient.fetchConnection(post.getId() + "/comments", Comment.class, Parameter.with("fields", "message,from{id,name}"));
-                
-                if (cmntDetails != null ) {
+
+                if (cmntDetails != null) {
 
                     List<Comment> cmntList = cmntDetails.getData();
-                    if(cmntList.size() > 0){
-                     //  System.out.println("Comment Details : " + post.getMessage()+"---"+cmntList);
-                       JSONObject newCmnts = new JSONObject();
-                       JSONArray receivedCmnts = new JSONArray();
-                       for (Comment comment : cmntList) {
-                            
+                    if (cmntList.size() > 0) {
+                        //  System.out.println("Comment Details : " + post.getMessage()+"---"+cmntList);
+                        JSONObject newCmnts = new JSONObject();
+                        JSONArray receivedCmnts = new JSONArray();
+                        for (Comment comment : cmntList) {
+
                             JSONObject cmnts = new JSONObject();
                             //fetch sender name and message
                             try {
-                                
+
                                 cmnts.put("sender", comment.getFrom().getName());
                                 cmnts.put("comment", comment.getMessage());
 
@@ -113,25 +145,23 @@ public class Activities {
                                 e.printStackTrace();
                             }
                             receivedCmnts.put(cmnts);
-                            
 
                         }
-                       newCmnts.put("postMessage", post.getMessage());
-                       newCmnts.put("comments", receivedCmnts);
-                       
-                       pagePosts.put(newCmnts);
-                       
-                       
-                    }else{
+                        newCmnts.put("postMessage", post.getMessage());
+                        newCmnts.put("comments", receivedCmnts);
+
+                        pagePosts.put(newCmnts);
+
+                    } else {
                         posts.put("postMessage", post.getMessage());
                         pagePosts.put(posts);
                     }
-                    
-                }else{
+
+                } else {
                     posts.put("postMessage", post.getMessage());
                     pagePosts.put(posts);
                 }
-                
+
             }
 
         }
@@ -145,21 +175,19 @@ public class Activities {
         fbPageClient.publish(commentId + "/comments", String.class, Parameter.with("message", "reply through api"));
         return "success";
     }
-   
 
     public JSONArray getConversations() throws JSONException, FileNotFoundException, IOException {
-        
+
         String id = new String();
 
         //fetch users sent message to your page
         Message m = null;
         Connection<Conversation> connection = fbPageClient.fetchConnection("me/conversations", Conversation.class);
-       
 
         JSONArray receivedConvos = new JSONArray();
         for (List<Conversation> conversationPage : connection) {
             for (Conversation convo : conversationPage) {
-                System.out.println("Convo : "+convo);
+                System.out.println("Convo : " + convo);
                 JSONArray receivedMsgs = new JSONArray();
                 id = convo.getId();
                 Connection<Message> messages = fbPageClient.fetchConnection(id + "/messages", Message.class, Parameter.with("fields", "message, created_time, from, id"));
@@ -191,7 +219,7 @@ public class Activities {
 
     public String postToPage(String message) {
         String status = new String();
-        
+
         FacebookType response = fbPageClient.publish(pageId + "/feed", FacebookType.class, Parameter.with("message", message));
         if (response.getId() != null) {
             status = "Successfully posted";

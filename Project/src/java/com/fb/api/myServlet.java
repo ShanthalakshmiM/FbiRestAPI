@@ -18,6 +18,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,7 +71,17 @@ public class myServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // processRequest(request, response);
-        Activities activitiesObj = new Activities();
+        String cookieValue = new String();
+        Cookie[] cookies = request.getCookies();
+     
+       
+        for(int i=0; i<cookies.length; i++){
+            System.out.println(cookies[i].getName()+" : "+cookies[i].getValue());
+            if(cookies[i].getName().equals("userId")){
+                cookieValue = cookies[i].getValue();
+            }
+        }
+        Activities activitiesObj = new Activities(cookieValue);
 
         String stringToJsp = new String();
         System.out.println("Path : " + getServletContext().getResourceAsStream("/WEB-INF/config.properties"));
@@ -205,6 +216,7 @@ public class myServlet extends HttpServlet {
         System.out.println(Response.toString());
 
     }
+    //-- used for making http call --//
     public HttpResponse sendPost(String url, String data) throws UnsupportedEncodingException{
         DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpPost httpPost = new HttpPost(url);

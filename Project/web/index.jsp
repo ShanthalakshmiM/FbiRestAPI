@@ -48,7 +48,7 @@
         <div id="parent">
             <center>
                 <form action="<%= request.getContextPath()%>/login" method="get" id="form">
-                    <a href="https://www.facebook.com/dialog/oauth?client_id=<%= appId%>&redirect_uri=<%= uri%>&scope=email,user_friends,manage_pages,read_page_mailboxes,publish_actions,publish_pages,user_about_me,email,user_posts" > <img src="./images/facebookLoginButton.jpg"/> </a>
+                    <a href="https://www.facebook.com/dialog/oauth?client_id=<%= appId%>&redirect_uri=<%= uri%>&scope=manage_pages,read_page_mailboxes,pages_messaging,publish_actions,publish_pages,user_about_me,email,user_posts" > <img src="./images/facebookLoginButton.jpg"/> </a>
 
                 </form>
             </center>   
