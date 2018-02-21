@@ -12,9 +12,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
-import com.restfb.DefaultJsonMapper;
 import com.restfb.FacebookClient;
-import com.restfb.JsonMapper;
 import com.restfb.Parameter;
 
 import com.restfb.types.Comment;
@@ -22,31 +20,17 @@ import com.restfb.types.Conversation;
 import com.restfb.types.FacebookType;
 import com.restfb.types.GraphResponse;
 import com.restfb.types.Message;
-import com.restfb.types.Page;
 import com.restfb.types.Post;
-import com.restfb.types.User;
-import com.restfb.types.send.ButtonTemplatePayload;
 import com.restfb.types.send.IdMessageRecipient;
 import com.restfb.types.send.MediaAttachment;
-import com.restfb.types.send.PostbackButton;
 import com.restfb.types.send.SendResponse;
-import com.restfb.types.send.TemplateAttachment;
-import com.restfb.types.send.WebButton;
 //import com.restfb.types.send.Message;
-import com.sun.corba.se.spi.presentation.rmi.StubAdapter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookieStore;
-import java.net.HttpCookie;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import javax.servlet.http.Cookie;
-import javax.websocket.Session;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,21 +44,20 @@ public class Activities {
     //client with page access token 
     FacebookClient fbPageClient;
     String pageId;
-   // private String userId;
+    // private String userId;
 
     public Activities(String cookieValue) throws FileNotFoundException, IOException {
-        System.out.println("Constructor called");
+        
         FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
         Properties prop = new Properties();
         prop.load(reader);
         String pat = prop.getProperty("pageAccessToken");
         this.fbPageClient = new DefaultFacebookClient(pat);
-        System.out.println("In activities - Pat : " + prop.getProperty("pageAccessToken"));
+        
         this.pageId = prop.getProperty("pageId");
-       // this.userId = cookieValue;
+        // this.userId = cookieValue;
         getDbValues(cookieValue);
-        
-        
+
     }
 
     public void getDbValues(String userId) throws UnknownHostException {
@@ -86,11 +69,9 @@ public class Activities {
         DBCursor cursor = collection.find(query);
         if (cursor.count() > 1) {
             throw new RuntimeException("More than 1 record found matching the user ID");
-        } 
-        else if(cursor.count()==0){
-            throw new RuntimeException("No records found matching"+userId);
-        }
-        else {
+        } else if (cursor.count() == 0) {
+            throw new RuntimeException("No records found matching" + userId);
+        } else {
             BasicDBObject savedDetails = (BasicDBObject) cursor.next();
             JSONArray savedPageDetails = (JSONArray) savedDetails.get("PageAccessTokens");
         }
@@ -116,7 +97,7 @@ public class Activities {
 
         //fetch all the posts
         Connection<Post> pageFeed = fbPageClient.fetchConnection(pageId + "/feed", Post.class);
-        System.out.println("---" + pageFeed);
+        //System.out.println("---" + pageFeed);
         for (List<Post> feed : pageFeed) {
 
             for (Post post : feed) {
@@ -232,11 +213,19 @@ public class Activities {
         // com.restfb.types.send.Message msg = new com.restfb.types.send.Message(message);
 //        MediaAttachment image = new MediaAttachment(MediaAttachment.Type.IMAGE, "http://restfb.com/documentation/");
 //        com.restfb.types.send.Message msg = new com.restfb.types.send.Message(image);
+
         IdMessageRecipient recipient = new IdMessageRecipient(id);
 
         SendResponse resp = fbPageClient.publish(id + "/messages", SendResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", message));
 
         return "success";
+    }
+    public void sendMessageByWebhook(String senderId, String message){
+         com.restfb.types.send.Message simpleTextMessage = new com.restfb.types.send.Message(message);
+
+                    IdMessageRecipient recipient = new IdMessageRecipient(senderId);
+
+                    GraphResponse resp = fbPageClient.publish("me/messages", GraphResponse.class, Parameter.with("recipient", recipient), Parameter.with("message", simpleTextMessage));
     }
 
 }

@@ -5,7 +5,7 @@
 --%>
 
 <%@page import="com.fb.api.Activities"%>
-<%@page import="com.fb.api.Constants"%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ page language="java" import="java.util.*" %>
 
@@ -44,9 +44,14 @@
         h3{
             color: white;
         }
+        output{
+            color : white;
+        }
     </style>
-    <body> 
 
+
+    <body> 
+    
     <center>
         <div>
             <div class="header" >
@@ -71,37 +76,75 @@
 
                         <input type="submit" class="btn btn-default" name="btnGetMsg" value="Get messages"/> <br/><br/>
                         <input type="submit" class="btn btn-default" name="btnGetCmnt" value="Get Comments"/><br/><br/>
- <!--                        <input type="button" class="btn btn-default" onclick="getCustomerDetails();" value="Get customer details"/><br/>-->
- <!--                        <input type="submit" class="btn btn-default" name="btReply" value="Post a reply"/>-->
+                        <!--                        <input type="button" class="btn btn-default" onclick="getCustomerDetails();" value="Get customer details"/><br/>-->
+                        <!--                        <input type="submit" class="btn btn-default" name="btReply" value="Post a reply"/>-->
+                    </form> 
                 </div>
-
-                </form> 
-
 
                 <form action="<%=request.getContextPath()%>/myServlet" method="post">
                     <input type="submit" class="btn-btn-default" name="broadcast" value="Broadcast message"/>
-                </form>
-                <!-- display textbox to get post message -->
-                <script type="text/javascript">
-                    var acc = document.getElementsByClassName("accordion");
-                    var i;
+                </form> <br/><br/>
 
-                    for (i = 0; i < acc.length; i++) {
-                        acc[i].addEventListener("click", function () {
-                            this.classList.toggle("active");
-                            var panel = this.nextElementSibling;
-                            if (panel.style.display === "block") {
-                                panel.style.display = "none";
-                            } else {
-                                panel.style.display = "block";
-                            }
-                        });
-                    }
+                <div id="output"> </div>
+            </div>
+        </div>
+    </center>
+    
+    <!--                                     <script type="text/javascript" src="webSocketJs.js"></script>-->
+    <!-- display textbox to get post message -->
+    <script type="text/javascript">
+        var wsUri = "ws://10.0.0.13:8080/Project/endpoint";
+        var webSocket = new WebSocket(wsUri);
+        alert("On js file");
+        webSocket.onerror = function (event) {
+            onError(event);
+        };
+
+        function onError(event) {
+            writeToScreen('<span style="color : red;"> Error: </span>' + event.data);
+        }
+        var output = document.getElementById("output");
+        webSocket.onopen = function (evt) {
+
+            onOpen(evt);
+        };
+        webSocket.onmessage = function (evt) {
+            onMessage(evt);
+        };
+        function writeToScreen(message) {
+            output.innerHTML += message +' <br/>';
+        }
+
+        function onOpen() {
+            alert("Websocket onOpen");
+            writeToScreen("Connected to " + wsUri + "</br>");
+        }
+        function onMessage(evt) {
+            var message = evt.data;
+            writeToScreen(message);
+        }
+
+    </script>
+    <script type="text/javascript">
+        var acc = document.getElementsByClassName("accordion");
+        var i;
+
+        for (i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.display === "block") {
+                    panel.style.display = "none";
+                } else {
+                    panel.style.display = "block";
+                }
+            });
+        }
 
 
-                </script>
+    </script>
 
-                </center>
 
-                </body>
-                </html>
+
+</body>
+</html>
