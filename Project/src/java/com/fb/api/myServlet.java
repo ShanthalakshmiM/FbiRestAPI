@@ -22,6 +22,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -67,11 +68,13 @@ public class myServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    String cookieValue = new String();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         // processRequest(request, response);
-        String cookieValue = new String();
+        
         Cookie[] cookies = request.getCookies();
      
        
@@ -81,6 +84,8 @@ public class myServlet extends HttpServlet {
                 cookieValue = cookies[i].getValue();
             }
         }
+      
+        
         Activities activitiesObj = new Activities(cookieValue);
 
         String stringToJsp = new String();
@@ -154,7 +159,7 @@ public class myServlet extends HttpServlet {
             request.getSession().setAttribute("result", stringToJsp);
             request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
         }
-
+       
     }
 
     /**
@@ -169,51 +174,7 @@ public class myServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         //processRequest(request, response);
-        FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
-        Properties prop = new Properties();
-        prop.load(reader);
-
-        String pat = prop.getProperty("pageAccessToken");
-
-        JSONObject data = new JSONObject();
-        JSONArray message = new JSONArray();
-        JSONObject dynamicMsg = new JSONObject();
-        JSONObject temp = new JSONObject();
-        try {
-            temp.put("text", "Broadcast test");
-            temp.put("fallback_text", "Hello friends");
-            dynamicMsg.put("dynamic_text", temp);
-        } catch (JSONException ex) {
-            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        message.put(dynamicMsg);
-        try {
-            data.put("messages", message);
-        } catch (JSONException ex) {
-            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        String msgCreativesUrl = "https://graph.facebook.com/v2.11/me/message_creatives?access_token=" + pat;
-        
-        HttpResponse urlResponse = sendPost(msgCreativesUrl, data.toString());
-         String response_id = EntityUtils.toString(urlResponse.getEntity());
-        JSONObject jsonObj = null;
-        try {
-            jsonObj = new JSONObject(response_id);
-        } catch (JSONException ex) {
-            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        System.out.println("Message Creatives ID : " + response_id);
-        JSONObject bd_payload = new JSONObject();
-        try {
-            bd_payload.put("message_creative_id", jsonObj.get("message_creative_id"));
-        } catch (JSONException ex) {
-            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        System.out.println("request : " + bd_payload.toString());
-        String broadcastUrl = "https://graph.facebook.com/v2.11/me/broadcast_messages?access_token=" + pat;
-        HttpResponse Response = sendPost(broadcastUrl, bd_payload.toString());
-        System.out.println(Response.toString());
+       
 
     }
     //-- used for making http call --//

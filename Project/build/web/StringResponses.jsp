@@ -4,7 +4,7 @@
     Author     : HP
 --%>
 
-<%@page import="com.fb.api.Constants"%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -46,7 +46,7 @@
                         <%= result%>
                     </h2>
                 </div>
-<!--                        <div> <p> <%= Constants.recipient_id %></p></div>-->
+
             </center>
         </div>                
     </body>

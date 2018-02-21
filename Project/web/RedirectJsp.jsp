@@ -5,7 +5,7 @@
 --%>
 
 <%@page import="com.fb.api.Activities"%>
-<%@page import="com.fb.api.Constants"%>
+
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -53,13 +53,10 @@
        -->
     <center>
         
-<!--        <% Object obj = Constants.recipient_id;
-        Object id = Constants.convoId;
-%>
+<!--     
         <div>
             <p>
-                <%= obj %> <br/>
-                <%= id %>
+               
                 
             </p>
         </div>-->
@@ -84,8 +81,8 @@
                 }
             }
             document.write("</textarea>");
-            document.write("<input type= 'hidden' value = '"+recipient+"' name = 'id'");
-            document.writeln("<br/> <br/><input type = 'text' name = 'StrMessage' /> <br/> <br/><input type = 'submit' name='btnSendMsg' value = 'send'/></form>");
+            document.write("<input type= 'hidden' value = '"+recipient+"' name = 'recipientId'");
+            document.writeln("<br/> <br/><input type = 'text' name = 'strMsg' /> <br/> <br/><input type = 'submit' name='btnSndMsg' value = 'send'/></form>");
         }
 //            document.writeln(messages[0].convId);
 //            document.writeln(messages[1].convId);
