@@ -47,7 +47,7 @@
 
         <div id="parent">
             <center>
-                <p> <%= request.getParameter("str") %></p>
+               
                 <form action="<%= request.getContextPath()%>/login" method="get" id="form">
                     <a href="https://www.facebook.com/dialog/oauth?client_id=<%= appId%>&redirect_uri=<%= uri%>&scope=manage_pages,read_page_mailboxes,pages_messaging,publish_actions,publish_pages,user_about_me,email,user_posts" > <img src="./images/facebookLoginButton.jpg"/> </a>
 

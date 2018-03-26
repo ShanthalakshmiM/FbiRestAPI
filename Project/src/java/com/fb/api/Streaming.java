@@ -28,11 +28,6 @@ public class Streaming {
     private String cookieValue = null;
     public static Set<Session> peers = null;
     String Message = new String();
-
-    static {
-        peers = Collections.synchronizedSet(new HashSet<Session>());
-    }
-
     public void setValue(String responseObject, String cookie) {
         System.out.println("Values set in Streaming.java\nCookie value : " + cookie);
         this.webhookResponse = responseObject;
@@ -40,9 +35,10 @@ public class Streaming {
 
     }
 
-    public void onStreaming(WebhookEntry entry) throws JSONException, JSONException, JSONException, JSONException, IOException {
+    public String onStreaming(WebhookEntry entry) throws JSONException, JSONException, JSONException, JSONException, IOException {
+        String message = new String();
         System.out.println("On Streaming Cookie Value : " + cookieValue);
-        Activities activities = new Activities(cookieValue);
+        Activities activities = new Activities(cookieValue,null);
         DefaultJsonMapper mapper = new DefaultJsonMapper();
         WebhookObject webhookObject = mapper.toJavaObject(webhookResponse, WebhookObject.class);
         for (Change change : entry.getChanges()) {
@@ -62,15 +58,18 @@ public class Streaming {
                     String reac_type = value.getString("reaction_type");
                     if (reac_type.equals("like")) {
                         System.out.println(sender + " liked your post");
+                        message = sender + " liked your post";
                         // peer.getBasicRemote().sendText(sender + " liked your post");
                     } else {
                         System.out.println(sender + " reacted " + reac_type + " to your post");
+                        message = sender + " reacted " + reac_type + " to your post";
                         //  peer.getBasicRemote().sendText(sender + " reacted " + reac_type + " to your post");
                     }
 
                 } else if (item.equals("comment")) {
                     String postContent = value.getString("message");
                     System.out.println(sender + " : " + postContent);
+                    message = sender + " : " + postContent;
                     //  peer.getBasicRemote().sendText(sender + " : " + postContent);
                 }
 
@@ -78,7 +77,7 @@ public class Streaming {
             }
 
         }
-
+        return message;
     }
 
     public void setMessage(String message) {
