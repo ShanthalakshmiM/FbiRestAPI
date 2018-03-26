@@ -43,24 +43,26 @@ public class Activities {
 
     //client with page access token 
     FacebookClient fbPageClient;
+    String userId;
     String pageId;
     // private String userId;
 
-    public Activities(String cookieValue) throws FileNotFoundException, IOException {
-        
-        FileReader reader = new FileReader("C:/Users/HP/Desktop/Documents/NetBeansProjects/Project/web/WEB-INF/config.properties");
-        Properties prop = new Properties();
-        prop.load(reader);
-        String pat = prop.getProperty("pageAccessToken");
+    public Activities(String cookieValue, String pageId) throws FileNotFoundException, IOException, UnknownHostException, JSONException {
+        this.pageId = pageId;
+        this.userId = cookieValue;
+       
+        String pat = getPageAcessToken();
         this.fbPageClient = new DefaultFacebookClient(pat);
         
-        this.pageId = prop.getProperty("pageId");
-        // this.userId = cookieValue;
-        getDbValues(cookieValue);
+        
+        
 
     }
 
-    public void getDbValues(String userId) throws UnknownHostException {
+    public String getPageAcessToken() throws UnknownHostException, JSONException {
+        System.out.println(" UserId : "+userId);
+        System.out.println("PageID : "+pageId);
+        String pageAccessToken = null;
         MongoClient mongoClient = new MongoClient("localhost", 27017);
         DB db = mongoClient.getDB("testDb");
         DBCollection collection = db.getCollection("testEnterprise");
@@ -73,8 +75,20 @@ public class Activities {
             throw new RuntimeException("No records found matching" + userId);
         } else {
             BasicDBObject savedDetails = (BasicDBObject) cursor.next();
-            JSONArray savedPageDetails = (JSONArray) savedDetails.get("PageAccessTokens");
+            System.out.println("SavedDetails : "+savedDetails.toString());
+            BasicDBObject savedATs = (BasicDBObject) savedDetails.get("accessTokens");
+            List<BasicDBObject>  savedPageDetails = (List<BasicDBObject> ) savedATs.get("PageAccessTokens");
+            System.out.println("SavedPageDetails : "+savedPageDetails.toString());
+            for(int i=0; i<savedPageDetails.size();i++){
+                BasicDBObject page = savedPageDetails.get(i);
+                String savedPageId = page.getString("pageId");
+                if(savedPageId.equals(pageId)){
+                    pageAccessToken = page.getString("accessToken");
+                }
+                
+            }
         }
+        return pageAccessToken;
     }
 
     public String makePost(String fbmessage) {
@@ -97,7 +111,6 @@ public class Activities {
 
         //fetch all the posts
         Connection<Post> pageFeed = fbPageClient.fetchConnection(pageId + "/feed", Post.class);
-        //System.out.println("---" + pageFeed);
         for (List<Post> feed : pageFeed) {
 
             for (Post post : feed) {

@@ -6,6 +6,7 @@
 package com.fb.api;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,6 +14,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -69,24 +71,34 @@ public class myServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     String cookieValue = new String();
+    String selectedPage = new String();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
+            throws ServletException, IOException, FileNotFoundException, UnknownHostException {
+
         // processRequest(request, response);
-        
         Cookie[] cookies = request.getCookies();
-     
-       
-        for(int i=0; i<cookies.length; i++){
-            System.out.println(cookies[i].getName()+" : "+cookies[i].getValue());
-            if(cookies[i].getName().equals("userId")){
+
+        for (int i = 0; i < cookies.length; i++) {
+           // System.out.println("Cookiessss ------ "+cookies[i].getName()+" ----- "+cookies[i].getValue());
+            //System.out.println(cookies[i].getName() + " : " + cookies[i].getValue());
+            if (cookies[i].getName().equals("userId")) {
+                System.out.println("myServlet cookievalue : "+cookieValue);
                 cookieValue = cookies[i].getValue();
             }
+            if (cookies[i].getName().equals("page")) {
+                selectedPage = cookies[i].getValue();
+                System.out.println("Selected Page : "+cookies[i].getValue()); 
+            }
         }
-      
-        
-        Activities activitiesObj = new Activities(cookieValue);
+
+        Activities activitiesObj = null;
+        try {
+            activitiesObj = new Activities(cookieValue,selectedPage);
+        } catch (JSONException ex) {
+            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         String stringToJsp = new String();
         System.out.println("Path : " + getServletContext().getResourceAsStream("/WEB-INF/config.properties"));
@@ -159,7 +171,8 @@ public class myServlet extends HttpServlet {
             request.getSession().setAttribute("result", stringToJsp);
             request.getRequestDispatcher("/StringResponses.jsp").forward(request, response);
         }
-       
+        
+
     }
 
     /**
@@ -174,14 +187,42 @@ public class myServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         //processRequest(request, response);
-       
+         Cookie[] cookies = request.getCookies();
+
+        for (int i = 0; i < cookies.length; i++) {
+           // System.out.println("Cookiessss ------ "+cookies[i].getName()+" ----- "+cookies[i].getValue());
+            //System.out.println(cookies[i].getName() + " : " + cookies[i].getValue());
+            if (cookies[i].getName().equals("userId")) {
+                System.out.println("myServlet cookievalue : "+cookieValue);
+                cookieValue = cookies[i].getValue();
+            }
+            if (cookies[i].getName().equals("page")) {
+                selectedPage = cookies[i].getValue();
+                System.out.println("Selected Page : "+cookies[i].getValue()); 
+            }
+        }
+
+        Activities activitiesObj = null;
+        try {
+            activitiesObj = new Activities(cookieValue,selectedPage);
+        } catch (JSONException ex) {
+            Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if((request.getParameter("btnReply"))!= null){
+             String id = request.getParameter("senderId");
+        String msg = request.getParameter("strMsg");
+            System.out.println("Message : "+msg);
+            System.out.println("Id : "+id);
+            activitiesObj.sendMessageByWebhook(id, msg);
+        }
 
     }
+
     //-- used for making http call --//
-    public HttpResponse sendPost(String url, String data) throws UnsupportedEncodingException{
+    public HttpResponse sendPost(String url, String data) throws UnsupportedEncodingException {
         DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpPost httpPost = new HttpPost(url);
-         StringEntity stringEntity = new StringEntity(data);
+        StringEntity stringEntity = new StringEntity(data);
         httpPost.setEntity(stringEntity);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
@@ -191,9 +232,10 @@ public class myServlet extends HttpServlet {
         } catch (IOException ex) {
             Logger.getLogger(myServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-      
+
         return urlResponse;
     }
+
     /**
      * Returns a short description of the servlet.
      *

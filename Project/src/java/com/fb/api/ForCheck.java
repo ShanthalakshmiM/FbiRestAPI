@@ -93,11 +93,10 @@ public class ForCheck extends HttpServlet {
             String enterpriseId = request.getParameter("enterpriseId");
             if (request.getParameter("update").equals("true")) {
                 update(enterpriseId, senderId);
-                 
-               
+
             } else if (request.getParameter("set").equals("true")) {
                 set(enterpriseId, senderId);
-                
+
             } else {
                 save(enterpriseId, senderId);
             }
@@ -105,9 +104,10 @@ public class ForCheck extends HttpServlet {
         }
 
     }
-     MongoDBConnection dbConnection = new MongoDBConnection();
+    MongoDBConnection dbConnection = new MongoDBConnection();
+
     public void save(String id, String senderId) throws UnknownHostException {
-       
+
         DBCollection collection = dbConnection.connectToDB("testCustomer");
         System.out.println("Passed value : " + id);
         BasicDBObject objectToSave = new BasicDBObject();
@@ -129,9 +129,8 @@ public class ForCheck extends HttpServlet {
 
     public void update(String id, String webhookId) throws UnknownHostException {
         System.out.println("In update()");
-         DBCollection collection = dbConnection.connectToDB("testCustomer");
-          BasicDBObject query = new BasicDBObject("enterpriseId", id);
-        System.out.println("In set()");
+        DBCollection collection = dbConnection.connectToDB("testCustomer");
+        BasicDBObject query = new BasicDBObject("enterpriseId", id);
         BasicDBObject addItem = new BasicDBObject("customerDetails", new BasicDBObject("webhookId", webhookId)
                 .append("convoId", "").append("mobileNumber", mobileNumber));
         BasicDBObject updateQuery = new BasicDBObject("$push", addItem);
@@ -139,7 +138,7 @@ public class ForCheck extends HttpServlet {
     }
 
     public void set(String id, String webhookId) throws UnknownHostException {
-        
+
     }
 
     /**
